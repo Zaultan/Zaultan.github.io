@@ -7,18 +7,16 @@
 <meta name="description" content="A spoiler-safe VOD hub template: frozen bracket, staged reveals, watch order. Swap in your own tournament.">
 
 <!--
-  TEMPLATE NOTES (delete before shipping)
-  ----------------------------------------
-  This is a structural clone: same section order, nav, bracket shape and
-  reveal mechanic as the reference site, rebuilt with an original visual
-  identity and placeholder copy. No images, video, or text were copied.
+  Bracket data + VOD links live in the <script> at the bottom (the
+  `matches` array). Team names, scores and links reflect the real
+  TI 2025 grand final result (Team Falcons def. Xtreme Gaming 3-2),
+  cross-checked against Liquipedia's match pages — worth a second
+  look before this goes live anywhere public.
 
-  Things to swap in for a real event:
-  1. TOURNAMENT_NAME / dates in the <header> and <footer>
-  2. The `matches` array in the <script> at the bottom (teams, scores, ids)
-  3. The 8 cards in #teams
-  4. The five stat values in #format
-  5. Prize pool amount + split in #prizes
+  Still open (not done in this pass):
+  1. Lock bracket matches until the Watch Order list actually reaches
+     them — right now, revealing a match in the bracket and reaching
+     it in the Watch Order are two independent actions.
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -177,11 +175,6 @@
   .order-item .idx{
     font-family:var(--font-mono); color:var(--text-dim); font-size:13px;
   }
-  .order-item .thumb{
-    width:100%; height:100%; min-height:44px; border-radius:6px;
-    background:linear-gradient(135deg,var(--ink-soft-2),var(--ink-soft));
-    border:1px solid var(--line);
-  }
   .order-item .meta{ display:flex; flex-direction:column; gap:2px; grid-column:2; }
   .order-item .meta .label{ font-weight:600; font-size:15px; }
   .order-item .meta .stage{
@@ -190,10 +183,12 @@
   .order-item .play{
     font-family:var(--font-mono); font-size:12px; color:var(--ink);
     background:var(--amber); border:none; padding:8px 14px; border-radius:6px;
-    cursor:pointer; font-weight:600; white-space:nowrap;
+    cursor:pointer; font-weight:600; white-space:nowrap; text-decoration:none;
+    display:inline-block;
   }
   .order-item .play:hover{ filter:brightness(1.08); }
   .order-item.locked .play{ background:var(--ink-soft-2); color:var(--text-dim); cursor:not-allowed; }
+  .order-item.locked .meta .label{ color:var(--text-dim); font-weight:500; }
   .warn{
     font-family:var(--font-mono); font-size:12px; color:var(--text-dim);
     margin-top:24px; padding:14px; border:1px dashed var(--line-2); border-radius:8px;
@@ -207,27 +202,39 @@
   .swatch{ width:14px; height:4px; border-radius:2px; }
   .swatch.up{ background:var(--amber); }
   .swatch.down{ background:var(--magenta); }
+  .swatch.drop{ background:repeating-linear-gradient(90deg, var(--magenta) 0 4px, transparent 4px 8px); }
 
-  .bracket-path{ margin-bottom:56px; }
+  .bracket-canvas{ position:relative; overflow-x:auto; padding-bottom:12px; -webkit-overflow-scrolling:touch; }
+  .bracket-lines{ position:absolute; top:0; left:0; pointer-events:none; }
+  .bracket-outer{ position:relative; display:flex; align-items:center; gap:56px; min-width:max-content; }
+  .bracket-stack{ display:flex; flex-direction:column; gap:56px; }
+
   .bracket-path h3{
     font-family:var(--font-mono); font-size:13px; letter-spacing:0.1em;
     text-transform:uppercase; margin-bottom:18px;
   }
   .bracket-path.up h3{ color:var(--amber); }
   .bracket-path.down h3{ color:var(--magenta); }
+  .bracket-path.gf h3{ color:var(--amber); text-align:center; }
 
-  .round-row{ display:flex; gap:18px; overflow-x:auto; padding-bottom:8px; }
-  .round-col{ min-width:220px; flex:1; }
+  .round-row{ display:flex; gap:16px; }
+  .round-col{
+    min-width:190px; flex:1;
+    display:flex; flex-direction:column; justify-content:space-around; gap:14px;
+  }
+  .bracket-path.gf .round-col{ min-width:230px; flex:none; }
   .round-col .round-name{
     font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
-    text-transform:uppercase; letter-spacing:0.08em; margin-bottom:10px;
+    text-transform:uppercase; letter-spacing:0.08em;
   }
+
   .match{
     background:var(--ink-soft); border:1px solid var(--line);
-    border-radius:var(--radius); padding:12px; margin-bottom:14px;
+    border-radius:var(--radius); padding:12px; position:relative;
   }
   .bracket-path.up .match{ border-left:3px solid var(--amber); }
   .bracket-path.down .match{ border-left:3px solid var(--magenta); }
+  .bracket-path.gf .match{ border-left:3px solid var(--amber); }
   .match-head{
     display:flex; justify-content:space-between; align-items:center;
     font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
@@ -241,21 +248,30 @@
   .team-row .name.placeholder{ color:var(--text-dim); font-weight:400; letter-spacing:0.12em; }
   .team-row .score{ font-family:var(--font-mono); color:var(--text-dim); }
   .match.score-shown .team-row .score{ color:var(--text); }
+
+  .games-row{ display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+  .game-btn{
+    font-family:var(--font-mono); font-size:11px; padding:5px 8px; border-radius:5px;
+    border:1px solid var(--line-2); text-decoration:none; line-height:1;
+  }
+  .game-btn.active{ background:var(--amber); color:var(--ink); font-weight:700; }
+  .game-btn.active:hover{ filter:brightness(1.08); text-decoration:none; }
+  .game-btn.locked{ background:var(--ink-soft-2); color:var(--text-dim); cursor:not-allowed; }
+  .game-btn.unplayed{ background:transparent; color:var(--text-dim); opacity:0.35; text-decoration:line-through; cursor:default; }
+
   .advance{
     margin-top:10px; padding-top:8px; border-top:1px dashed var(--line);
     font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
   }
-  .match-actions{ display:flex; gap:6px; margin-top:10px; }
+  .advance.drop{ border-top:none; padding-top:0; margin-top:4px; color:var(--magenta); font-size:10px; }
+
+  .match-actions{ display:flex; gap:6px; margin-top:10px; min-height:26px; }
   .match-actions button{
     font-family:var(--font-mono); font-size:12px; background:var(--ink-soft-2);
     border:1px solid var(--line-2); color:var(--text-dim);
     width:30px; height:26px; border-radius:6px; cursor:pointer;
   }
   .match-actions button:hover{ color:var(--text); }
-  .match-actions button.reveal-score{ display:none; }
-  .match.teams-shown .match-actions button.reveal-score{ display:inline-block; }
-  .match.teams-shown .match-actions button.reveal-teams{ display:none; }
-  .match.score-shown .match-actions button.reveal-score{ display:none; }
 
   .final-note{
     text-align:center; font-family:var(--font-mono); font-size:12px;
@@ -287,19 +303,6 @@
     font-family:var(--font-mono); font-size:11px; color:var(--mint); margin-top:8px;
   }
 
-  /* ---------- FORMAT STATS ---------- */
-  .stat-grid{
-    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-    gap:1px; background:var(--line); border:1px solid var(--line);
-    border-radius:var(--radius); overflow:hidden; margin-top:32px;
-  }
-  .stat{ background:var(--ink-soft); padding:24px 20px; }
-  .stat .value{ font-family:var(--font-display); font-size:34px; color:var(--amber); }
-  .stat .label{
-    font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
-    text-transform:uppercase; letter-spacing:0.08em; margin-top:4px;
-  }
-
   /* ---------- PRIZE POOL ---------- */
   .prize-card{
     background:var(--ink-soft); border:1px solid var(--line);
@@ -307,10 +310,11 @@
   }
   .prize-total{ font-family:var(--font-display); font-size:48px; color:var(--amber); }
   .split-bar{ display:flex; height:14px; border-radius:999px; overflow:hidden; margin:20px 0 14px; }
-  .split-bar span:nth-child(1){ background:var(--amber); width:50%; }
-  .split-bar span:nth-child(2){ background:var(--mint); width:25%; }
-  .split-bar span:nth-child(3){ background:var(--magenta); width:15%; }
-  .split-bar span:nth-child(4){ background:var(--text-dim); width:10%; }
+  .split-bar span:nth-child(1){ background:var(--amber); width:42.5%; }
+  .split-bar span:nth-child(2){ background:var(--mint); width:13%; }
+  .split-bar span:nth-child(3){ background:var(--magenta); width:9%; }
+  .split-bar span:nth-child(4){ background:var(--text-dim); width:6%; }
+  .split-bar span:nth-child(5){ background:var(--amber); width:29.5%; }
   .split-legend{ display:flex; gap:22px; flex-wrap:wrap; font-size:13px; color:var(--text-dim); }
   .split-legend .who{ font-family:var(--font-mono); color:var(--text-dim); }
   body.spoilers-on .split-legend .who{ color:var(--text); }
@@ -327,6 +331,8 @@
     section{ padding:64px 0; }
     .order-item{ grid-template-columns:36px 1fr; }
     .order-item .play{ grid-column:2; justify-self:start; }
+    .bracket-outer{ gap:32px; }
+    .bracket-stack{ gap:36px; }
   }
 </style>
 </head>
@@ -339,7 +345,6 @@
       <a href="#watch-order">Watch Order</a>
       <a href="#bracket">Bracket</a>
       <a href="#teams">Teams</a>
-      <a href="#format">Format</a>
     </nav>
     <button class="spoiler-toggle" id="spoilerToggle" aria-pressed="false">
       SPOILERS
@@ -364,29 +369,12 @@
   <div class="wrap">
     <p class="eyebrow">Step one</p>
     <h2>Watch Order</h2>
-    <p style="max-width:520px;margin-top:10px;">Play these top to bottom. Each one only unlocks
-      once you've reached it in the list — that's the entire spoiler-safety system.</p>
-    <ul class="order-list">
-      <li class="order-item"><span class="idx">01</span>
-        <div class="meta"><span class="label">Group Match — Round 1, Game 1</span><span class="stage">Best of 1</span></div>
-        <div class="thumb" style="display:none"></div>
-        <button class="play">▶ WATCH</button>
-      </li>
-      <li class="order-item"><span class="idx">02</span>
-        <div class="meta"><span class="label">Group Match — Round 1, Game 2</span><span class="stage">Best of 1</span></div>
-        <button class="play">▶ WATCH</button>
-      </li>
-      <li class="order-item"><span class="idx">03</span>
-        <div class="meta"><span class="label">Upper Bracket Final</span><span class="stage">Best of 3</span></div>
-        <button class="play">▶ WATCH</button>
-      </li>
-      <li class="order-item locked"><span class="idx">04</span>
-        <div class="meta"><span class="label">Grand Final</span><span class="stage">Best of 3 · locked until you catch up</span></div>
-        <button class="play" disabled>▶ WATCH</button>
-      </li>
-    </ul>
-    <p class="warn">⚠ Video titles on the host channel will name both teams. Only open a
-      match once you've actually reached it in the order above.</p>
+    <p style="max-width:560px;margin-top:10px;">Every game from the tournament, in play order.
+      Rows stay locked until you reveal that match in the bracket below — reveal a match once,
+      and every game inside it unlocks here too.</p>
+    <ul class="order-list" id="watchOrderList"></ul>
+    <p class="warn">⚠ Video titles on the host channel will name both teams. Only reveal a
+      match once you're actually ready to watch it.</p>
   </div>
 </section>
 
@@ -396,26 +384,33 @@
     <h2>Bracket</h2>
     <p style="max-width:560px;margin-top:10px;">Double elimination, frozen at its day-one shape.
       Click the eye on any match to reveal who played — the score stays hidden until you ask
-      for that too.</p>
+      for that too, and the game buttons only go live once the matchup is revealed.</p>
 
     <div class="bracket-legend">
       <div class="item"><span class="swatch up"></span> Upper bracket — winners path</div>
       <div class="item"><span class="swatch down"></span> Lower bracket — one loss and you're out</div>
+      <div class="item"><span class="swatch drop"></span> Where a losing team drops to</div>
     </div>
 
-    <div class="bracket-path up">
-      <h3>⬆ Upper Bracket</h3>
-      <div class="round-row" id="upperRounds"></div>
-    </div>
-
-    <div class="bracket-path down">
-      <h3>⬇ Lower Bracket</h3>
-      <div class="round-row" id="lowerRounds"></div>
-    </div>
-
-    <div class="bracket-path" style="max-width:260px;margin:0 auto;">
-      <div class="round-row" id="grandFinalRound"></div>
-      <p class="final-note">🏆 Champion emerges here</p>
+    <div class="bracket-canvas" id="bracketCanvas">
+      <svg class="bracket-lines" id="bracketLines"></svg>
+      <div class="bracket-outer">
+        <div class="bracket-stack">
+          <div class="bracket-path up">
+            <h3>⬆ Upper Bracket</h3>
+            <div class="round-row" id="upperRounds"></div>
+          </div>
+          <div class="bracket-path down">
+            <h3>⬇ Lower Bracket</h3>
+            <div class="round-row" id="lowerRounds"></div>
+          </div>
+        </div>
+        <div class="bracket-path gf">
+          <h3>🏆 Grand Final</h3>
+          <div class="round-row" id="grandFinalRound"></div>
+          <p class="final-note">Champion crowned here</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -423,36 +418,19 @@
 <section id="teams">
   <div class="wrap">
     <p class="eyebrow">The field</p>
-    <h2>Eight Teams</h2>
-    <p style="max-width:520px;margin-top:10px;">Rosters as locked before day one. Seeds reflect
-      pre-event ratings, not results.</p>
+    <h2>Participants</h2>
+    <p style="max-width:520px;margin-top:10px;">Team Ratings taken from Liquipedia on 2026-08-02</p>
     <div class="team-grid">
-      <div class="team-card"><div class="flag">A</div><div class="name">Team Aurora</div><div class="seed">SEED 1</div><div class="mmr">RATING 6120</div></div>
-      <div class="team-card"><div class="flag">B</div><div class="name">Team Basalt</div><div class="seed">SEED 2</div><div class="mmr">RATING 6045</div></div>
-      <div class="team-card"><div class="flag">C</div><div class="name">Team Cobalt</div><div class="seed">SEED 3</div><div class="mmr">RATING 5980</div></div>
-      <div class="team-card"><div class="flag">D</div><div class="name">Team Delta</div><div class="seed">SEED 4</div><div class="mmr">RATING 5910</div></div>
-      <div class="team-card"><div class="flag">E</div><div class="name">Team Ember</div><div class="seed">SEED 5</div><div class="mmr">RATING 5840</div></div>
-      <div class="team-card"><div class="flag">F</div><div class="name">Team Fathom</div><div class="seed">SEED 6</div><div class="mmr">RATING 5790</div></div>
-      <div class="team-card"><div class="flag">G</div><div class="name">Team Griffon</div><div class="seed">SEED 7</div><div class="mmr">RATING 5705</div></div>
-      <div class="team-card"><div class="flag">H</div><div class="name">Team Halyard</div><div class="seed">SEED 8</div><div class="mmr">RATING 5630</div></div>
+      <div class="team-card"><div class="flag">A</div><div class="name">Xtreme Gaming</div><div class="seed">SEED 1</div><div class="mmr">Points 1653</div></div>
+      <div class="team-card"><div class="flag">B</div><div class="name">Tundra Esport</div><div class="seed">SEED 2</div><div class="mmr">Points 1487</div></div>
+      <div class="team-card"><div class="flag">C</div><div class="name">Parivision</div><div class="seed">SEED 3</div><div class="mmr">Points 1766</div></div>
+      <div class="team-card"><div class="flag">D</div><div class="name">Heroic</div><div class="seed">SEED 4</div><div class="mmr">Points  ???</div></div>
+      <div class="team-card"><div class="flag">E</div><div class="name">Team Tidebound</div><div class="seed">SEED 5</div><div class="mmr">Points ???</div></div>
+      <div class="team-card"><div class="flag">F</div><div class="name">Team Falcons</div><div class="seed">SEED 6</div><div class="mmr">Points 1750</div></div>
+      <div class="team-card"><div class="flag">G</div><div class="name">BB Team</div><div class="seed">SEED 7</div><div class="mmr">Points 1778</div></div>
+      <div class="team-card"><div class="flag">H</div><div class="name">Nigma Galaxy</div><div class="seed">SEED 8</div><div class="mmr">Points 1529</div></div>
     </div>
-  </div>
-</section>
-
-<section id="format">
-  <div class="wrap">
-    <p class="eyebrow">The rules</p>
-    <h2>Format</h2>
-    <p style="max-width:600px;margin-top:10px;">Eight teams, double elimination, played over a
-      single weekend. Day one seeds the bracket with best-of-ones; day two runs best-of-threes
-      the rest of the way.</p>
-    <div class="stat-grid">
-      <div class="stat"><div class="value">8</div><div class="label">Teams</div></div>
-      <div class="stat"><div class="value">2X</div><div class="label">Elimination</div></div>
-      <div class="stat"><div class="value">2</div><div class="label">Days</div></div>
-      <div class="stat"><div class="value">13</div><div class="label">Matches</div></div>
-      <div class="stat"><div class="value">EU</div><div class="label">Server region</div></div>
-    </div>
+    <p style="max-width:520px;margin-top:10px;">* 1W/Iron Wing rating used</p>
   </div>
 </section>
 
@@ -461,15 +439,15 @@
     <p class="eyebrow">Community-funded</p>
     <h2>Prize Pool</h2>
     <div class="prize-card">
-      <div class="prize-total">$0,000</div>
-      <p style="margin-top:4px;">Split between the top four finishers. Who took which cut stays
-        behind the spoiler switch.</p>
-      <div class="split-bar"><span></span><span></span><span></span><span></span></div>
+      <div class="prize-total">$2,881,791</div>
+      <p style="margin-top:4px;">Tournament Split of prize pools and their percentages</p>
+      <div class="split-bar"><span></span><span></span><span></span><span></span><span></span></div>
       <div class="split-legend">
-        <span>50% — <span class="who">1st: ??? </span></span>
-        <span>25% — <span class="who">2nd: ??? </span></span>
-        <span>15% — <span class="who">3rd: ??? </span></span>
-        <span>10% — <span class="who">4th: ??? </span></span>
+        <span>42.5% — <span class="who">1st $1,224,732 </span></span>
+        <span>13% — <span class="who">2nd: $374,676 </span></span>
+        <span>9% — <span class="who">3rd: $259,319	 </span></span>
+        <span>6% — <span class="who">4th: $172,918	 </span></span>
+        <span>1% — <span class="who">5-16th: $172,918	 </span></span>
       </div>
     </div>
   </div>
@@ -486,111 +464,279 @@
 
 <script>
 (function(){
-  // ---- Bracket data model -------------------------------------------
-  // Replace teamA/teamB/scoreA/scoreB with your real results. Everything
-  // else (ids, rounds, advance labels) just describes bracket shape.
-  const upperRounds = [
-    { name:'Round 1', matches:[
-      { id:'UR1-1', fmt:'BO1', teamA:'Team A', teamB:'Team B', scoreA:2, scoreB:0, advance:'→ Round 2 · M1' },
-      { id:'UR1-2', fmt:'BO1', teamA:'Team C', teamB:'Team D', scoreA:2, scoreB:1, advance:'→ Round 2 · M1' },
-      { id:'UR1-3', fmt:'BO1', teamA:'Team E', teamB:'Team F', scoreA:2, scoreB:0, advance:'→ Round 2 · M2' },
-      { id:'UR1-4', fmt:'BO1', teamA:'Team G', teamB:'Team H', scoreA:2, scoreB:1, advance:'→ Round 2 · M2' },
-    ]},
-    { name:'Round 2', matches:[
-      { id:'UR2-1', fmt:'BO1', teamA:'Winner UR1-1', teamB:'Winner UR1-2', scoreA:2, scoreB:1, advance:'→ Upper Final' },
-      { id:'UR2-2', fmt:'BO1', teamA:'Winner UR1-3', teamB:'Winner UR1-4', scoreA:1, scoreB:2, advance:'→ Upper Final' },
-    ]},
-    { name:'Upper Final', matches:[
-      { id:'UF', fmt:'BO3', teamA:'Winner UR2-1', teamB:'Winner UR2-2', scoreA:2, scoreB:0, advance:'→ Grand Final' },
-    ]},
+  // ---- Bracket + VOD data ------------------------------------------------
+  // `next`     = id of the match the WINNER advances to
+  // `dropsTo`  = id of the match the LOSER drops to (upper bracket only)
+  // `games`    = ordered VOD urls; null = that game wasn't played (series
+  //              ended before it was needed)
+  const matches = [
+    { id:'UR1-1', path:'up', roundName:'Round 1', fmt:'BO3',
+      teamA:'Xtreme Gaming', teamB:'Tundra Esports', scoreA:2, scoreB:0,
+      games:['https://youtu.be/ke5nzwisv-Q','https://www.youtube.com/watch?v=D84RWQf6-gY',null],
+      next:'UR2-1', dropsTo:'LR0-1' },
+    { id:'UR1-2', path:'up', roundName:'Round 1', fmt:'BO3',
+      teamA:'Parivision', teamB:'Heroic', scoreA:2, scoreB:0,
+      games:['https://youtu.be/lgB8vvhSXmw','https://youtu.be/7J1bIjfKXUk',null],
+      next:'UR2-1', dropsTo:'LR0-1' },
+    { id:'UR1-3', path:'up', roundName:'Round 1', fmt:'BO3',
+      teamA:'Team Tidebound', teamB:'Team Falcons', scoreA:0, scoreB:2,
+      games:['https://www.youtube.com/watch?v=IoRXQU5qoVE','https://www.youtube.com/watch?v=V4kDPzmQfGc',null],
+      next:'UR2-2', dropsTo:'LR0-2' },
+    { id:'UR1-4', path:'up', roundName:'Round 1', fmt:'BO3',
+      teamA:'BB Team', teamB:'Nigma Galaxy', scoreA:2, scoreB:1,
+      games:['https://www.youtube.com/watch?v=np7QK-Qkc70','https://www.youtube.com/watch?v=Ioxq_neNoj4&pp=0gcJCfkLAYcqIYzv','https://www.youtube.com/watch?v=yOGrD4cFBG4'],
+      next:'UR2-2', dropsTo:'LR0-2' },
+
+    { id:'LR0-1', path:'down', roundName:'Round 1', fmt:'BO3',
+      teamA:'Tundra Esports', teamB:'Heroic', scoreA:0, scoreB:2,
+      games:['https://www.youtube.com/watch?v=965LsZIuNpo','https://www.youtube.com/watch?v=bZIqE_la0Dw',null],
+      next:'LR1-1', dropsTo:null },
+    { id:'LR0-2', path:'down', roundName:'Round 1', fmt:'BO3',
+      teamA:'Team Tidebound', teamB:'Nigma Galaxy', scoreA:0, scoreB:2,
+      games:['https://www.youtube.com/watch?v=FkWUJW7m4sg&pp=0gcJCfkLAYcqIYzv','https://www.youtube.com/watch?v=hNWtt-mV0VI',null],
+      next:'LR1-2', dropsTo:null },
+
+    { id:'UR2-1', path:'up', roundName:'Round 2', fmt:'BO3',
+      teamA:'Xtreme Gaming', teamB:'Parivision', scoreA:0, scoreB:2,
+      games:['https://www.youtube.com/watch?v=dW-C2Cajm-E','https://www.youtube.com/watch?v=lvNl_SSKJpg',null],
+      next:'UF', dropsTo:'LR1-2' },
+    { id:'UR2-2', path:'up', roundName:'Round 2', fmt:'BO3',
+      teamA:'Team Falcons', teamB:'BB Team', scoreA:2, scoreB:1,
+      games:['https://www.youtube.com/watch?v=Z9Fg-P10glo','https://www.youtube.com/watch?v=yK10CCR6U6A','https://www.youtube.com/watch?v=zyo61kPZU64'],
+      next:'UF', dropsTo:'LR1-1' },
+
+    { id:'LR1-1', path:'down', roundName:'Round 2', fmt:'BO3',
+      teamA:'BB Team', teamB:'Heroic', scoreA:2, scoreB:1,
+      games:['https://www.youtube.com/watch?v=YEP1oUO43L4','https://www.youtube.com/watch?v=qqgxs_bg29Q','https://www.youtube.com/watch?v=Vw2suZTSIR0'],
+      next:'LSF', dropsTo:null },
+    { id:'LR1-2', path:'down', roundName:'Round 2', fmt:'BO3',
+      teamA:'Xtreme Gaming', teamB:'Nigma Galaxy', scoreA:2, scoreB:0,
+      games:['https://www.youtube.com/watch?v=HLn33oP8cik&pp=0gcJCfkLAYcqIYzv','https://www.youtube.com/watch?v=Dp0_VsS7pHk',null],
+      next:'LSF', dropsTo:null },
+
+    { id:'UF', path:'up', roundName:'Upper Final', fmt:'BO3',
+      teamA:'Parivision', teamB:'Team Falcons', scoreA:1, scoreB:2,
+      games:['https://www.youtube.com/watch?v=59TwKSEAWX4','https://www.youtube.com/watch?v=aOJ_l3PL-Ys','https://www.youtube.com/watch?v=LepJpEs_2ts'],
+      next:'GF', dropsTo:'LF' },
+
+    { id:'LSF', path:'down', roundName:'Semifinal', fmt:'BO3',
+      teamA:'BB Team', teamB:'Xtreme Gaming', scoreA:0, scoreB:2,
+      games:['https://www.youtube.com/watch?v=MBsNs8QE_gY','https://www.youtube.com/watch?v=8LALMXiGx1Q',null],
+      next:'LF', dropsTo:null },
+
+    { id:'LF', path:'down', roundName:'Lower Final', fmt:'BO3',
+      teamA:'Parivision', teamB:'Xtreme Gaming', scoreA:1, scoreB:2,
+      games:['https://www.youtube.com/watch?v=bMjOS94IFjo','https://www.youtube.com/watch?v=4WdegZkxAAE','https://www.youtube.com/watch?v=OOmS0V_V4IA'],
+      next:'GF', dropsTo:null },
+
+    { id:'GF', path:'gf', roundName:'Grand Final', fmt:'BO5',
+      teamA:'Team Falcons', teamB:'Xtreme Gaming', scoreA:3, scoreB:2,
+      games:['https://www.youtube.com/watch?v=ahknoefViss','https://www.youtube.com/watch?v=nNJtSWsVPdM&pp=0gcJCfkLAYcqIYzv','https://www.youtube.com/watch?v=UfET_n7n2NA','https://www.youtube.com/watch?v=lA6bxkJca3Y&pp=0gcJCfkLAYcqIYzv','https://www.youtube.com/watch?v=cHvTjBIX53c'],
+      next:null, dropsTo:null },
   ];
 
-  const lowerRounds = [
-    { name:'Elim Round', matches:[
-      { id:'LR0-1', fmt:'BO1', teamA:'Loser UR1-1', teamB:'Loser UR1-2', scoreA:2, scoreB:1, advance:'→ LB Round 1' },
-      { id:'LR0-2', fmt:'BO1', teamA:'Loser UR1-3', teamB:'Loser UR1-4', scoreA:0, scoreB:2, advance:'→ LB Round 1' },
-    ]},
-    { name:'LB Round 1', matches:[
-      { id:'LR1-1', fmt:'BO1', teamA:'Loser UR2-2', teamB:'Winner LR0-1', scoreA:2, scoreB:0, advance:'→ LB Semifinal' },
-      { id:'LR1-2', fmt:'BO1', teamA:'Loser UR2-1', teamB:'Winner LR0-2', scoreA:1, scoreB:2, advance:'→ LB Semifinal' },
-    ]},
-    { name:'LB Semifinal', matches:[
-      { id:'LSF', fmt:'BO3', teamA:'Winner LR1-1', teamB:'Winner LR1-2', scoreA:2, scoreB:1, advance:'→ LB Final' },
-    ]},
-    { name:'LB Final', matches:[
-      { id:'LF', fmt:'BO3', teamA:'Loser UF', teamB:'Winner LSF', scoreA:1, scoreB:2, advance:'→ Grand Final' },
-    ]},
-  ];
+  const matchesById = Object.fromEntries(matches.map(m => [m.id, m]));
 
-  const grandFinal = [
-    { name:'Grand Final', matches:[
-      { id:'GF', fmt:'BO3', teamA:'Winner UF', teamB:'Winner LF', scoreA:3, scoreB:1, advance:'🏆 Champion crowned' },
-    ]},
+  const upperGroups = [
+    { name:'Round 1',     ids:['UR1-1','UR1-2','UR1-3','UR1-4'] },
+    { name:'Round 2',     ids:['UR2-1','UR2-2'] },
+    { name:'Upper Final', ids:['UF'] },
   ];
+  const lowerGroups = [
+    { name:'Round 1',     ids:['LR0-1','LR0-2'] },
+    { name:'Round 2',     ids:['LR1-1','LR1-2'] },
+    { name:'Semifinal',   ids:['LSF'] },
+    { name:'Lower Final', ids:['LF'] },
+  ];
+  const gfGroups = [{ name:'Grand Final', ids:['GF'] }];
 
-  function matchHTML(m){
+  const SHORT_LABEL = {
+    'UR2-1':'Upper R2 · M1', 'UR2-2':'Upper R2 · M2', 'UF':'Upper Final',
+    'LR0-1':'Lower R1 · M1', 'LR0-2':'Lower R1 · M2',
+    'LR1-1':'Lower R2 · M1', 'LR1-2':'Lower R2 · M2',
+    'LSF':'Lower Semifinal', 'LF':'Lower Final', 'GF':'Grand Final',
+  };
+  const PATH_LABEL = { up:'Upper Bracket', down:'Lower Bracket', gf:'Grand Final' };
+
+  const INITIAL_IDS = ['UR1-1','UR1-2','UR1-3','UR1-4'];
+  let teamsRevealed = new Set(INITIAL_IDS);
+  let scoresRevealed = new Set(INITIAL_IDS);
+
+  // ---- Rendering -----------------------------------------------------
+  function matchCardHTML(m){
+    const shown = teamsRevealed.has(m.id);
+    const scored = scoresRevealed.has(m.id);
+    const slots = Math.max(3, m.games.length);
+    let gamesHTML = '';
+    for(let i = 0; i < slots; i++){
+      const url = m.games[i];
+      if(!url){
+        gamesHTML += `<span class="game-btn unplayed" aria-disabled="true" title="Not played">G${i+1}</span>`;
+      } else if(shown){
+        gamesHTML += `<a class="game-btn active" href="${url}" target="_blank" rel="noopener">G${i+1}</a>`;
+      } else {
+        gamesHTML += `<span class="game-btn locked" aria-disabled="true" title="Reveal the matchup to unlock">G${i+1}</span>`;
+      }
+    }
+
+    let advanceHTML = '';
+    if(m.next) advanceHTML += `<div class="advance">→ ${SHORT_LABEL[m.next] || m.next}</div>`;
+    else advanceHTML += `<div class="advance">🏆 Champion crowned</div>`;
+    if(m.dropsTo) advanceHTML += `<div class="advance drop">↴ loser to ${SHORT_LABEL[m.dropsTo] || m.dropsTo}</div>`;
+
     return `
-      <div class="match" data-id="${m.id}">
+      <div class="match" data-id="${m.id}" data-path="${m.path}" data-next="${m.next || ''}" data-drops-to="${m.dropsTo || ''}">
         <div class="match-head"><span>${m.id}</span><span>${m.fmt}</span></div>
         <div class="team-row">
-          <span class="name placeholder" data-real="${m.teamA}">·········</span>
-          <span class="score" data-real="${m.scoreA}">—</span>
+          <span class="name ${shown ? '' : 'placeholder'}">${shown ? m.teamA : '·········'}</span>
+          <span class="score">${scored ? m.scoreA : '—'}</span>
         </div>
         <div class="team-row">
-          <span class="name placeholder" data-real="${m.teamB}">·········</span>
-          <span class="score" data-real="${m.scoreB}">—</span>
+          <span class="name ${shown ? '' : 'placeholder'}">${shown ? m.teamB : '·········'}</span>
+          <span class="score">${scored ? m.scoreB : '—'}</span>
         </div>
-        <div class="advance">${m.advance}</div>
+        <div class="games-row">${gamesHTML}</div>
+        ${advanceHTML}
         <div class="match-actions">
-          <button class="reveal-teams" title="Reveal matchup">👁</button>
-          <button class="reveal-score" title="Reveal score">?</button>
+          <button class="reveal-teams" data-id="${m.id}" title="Reveal matchup" style="${shown ? 'display:none' : ''}">👁</button>
+          <button class="reveal-score" data-id="${m.id}" title="Reveal score" style="${(!shown || scored) ? 'display:none' : ''}">?</button>
         </div>
       </div>`;
   }
 
-  function renderRounds(container, rounds){
-    container.innerHTML = rounds.map(r => `
+  function renderRounds(container, groups){
+    container.innerHTML = groups.map(g => `
       <div class="round-col">
-        <div class="round-name">${r.name}</div>
-        ${r.matches.map(matchHTML).join('')}
+        <div class="round-name">${g.name}</div>
+        ${g.ids.map(id => matchCardHTML(matchesById[id])).join('')}
       </div>
     `).join('');
   }
 
-  renderRounds(document.getElementById('upperRounds'), upperRounds);
-  renderRounds(document.getElementById('lowerRounds'), lowerRounds);
-  renderRounds(document.getElementById('grandFinalRound'), grandFinal);
-
-  // ---- Reveal mechanics ------------------------------------------------
-  function revealTeams(matchEl){
-    matchEl.querySelectorAll('.name').forEach(el=>{
-      el.textContent = el.dataset.real;
-      el.classList.remove('placeholder');
-    });
-    matchEl.classList.add('teams-shown');
+  function renderWatchOrder(){
+    let idx = 1;
+    const html = matches.map(m => {
+      const shown = teamsRevealed.has(m.id);
+      const label = `${PATH_LABEL[m.path]} · ${m.roundName} · ${m.id}`;
+      const count = shown ? m.games.filter(Boolean).length : 3;
+      let rows = '';
+      for(let i = 0; i < count; i++){
+        const n = String(idx++).padStart(2,'0');
+        if(shown){
+          rows += `
+            <li class="order-item">
+              <span class="idx">${n}</span>
+              <div class="meta">
+                <span class="label">${m.teamA} vs ${m.teamB} — Game ${i+1}</span>
+                <span class="stage">${label} · ${m.fmt}</span>
+              </div>
+              <a class="play" href="${m.games[i]}" target="_blank" rel="noopener">▶ WATCH</a>
+            </li>`;
+        } else {
+          rows += `
+            <li class="order-item locked">
+              <span class="idx">${n}</span>
+              <div class="meta">
+                <span class="label">${label} — Game ${i+1}</span>
+                <span class="stage">Locked · reveal this match in the bracket</span>
+              </div>
+              <button class="play" disabled>🔒 LOCKED</button>
+            </li>`;
+        }
+      }
+      return rows;
+    }).join('');
+    document.getElementById('watchOrderList').innerHTML = html;
   }
-  function revealScore(matchEl){
-    matchEl.querySelectorAll('.score').forEach(el=>{
-      el.textContent = el.dataset.real;
+
+  // ---- Connecting lines ------------------------------------------------
+  function drawLines(){
+    const canvas = document.getElementById('bracketCanvas');
+    const svg = document.getElementById('bracketLines');
+    if(!canvas || !svg) return;
+    const w = canvas.scrollWidth, h = canvas.scrollHeight;
+    svg.setAttribute('width', w);
+    svg.setAttribute('height', h);
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    svg.innerHTML = '';
+
+    const AMBER = '#f5b400', MAGENTA = '#ff3d81';
+    const canvasRect = canvas.getBoundingClientRect();
+
+    function ports(el){
+      const r = el.getBoundingClientRect();
+      return {
+        outX: r.right - canvasRect.left + canvas.scrollLeft,
+        outY: r.top + r.height/2 - canvasRect.top + canvas.scrollTop,
+        inX:  r.left - canvasRect.left + canvas.scrollLeft,
+        inY:  r.top + r.height/2 - canvasRect.top + canvas.scrollTop,
+      };
+    }
+    function curve(x1,y1,x2,y2,color,dashed){
+      const mx = (x1+x2)/2;
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d', `M ${x1} ${y1} C ${mx} ${y1} ${mx} ${y2} ${x2} ${y2}`);
+      path.setAttribute('stroke', color);
+      path.setAttribute('stroke-width', '2');
+      path.setAttribute('fill', 'none');
+      if(dashed) path.setAttribute('stroke-dasharray', '6 5');
+      svg.appendChild(path);
+    }
+
+    document.querySelectorAll('.match[data-id]').forEach(el => {
+      const m = matchesById[el.dataset.id];
+      if(!m) return;
+      const from = ports(el);
+      if(m.next){
+        const target = document.querySelector(`.match[data-id="${m.next}"]`);
+        if(target){
+          const to = ports(target);
+          curve(from.outX, from.outY, to.inX, to.inY, m.path === 'down' ? MAGENTA : AMBER, false);
+        }
+      }
+      if(m.dropsTo){
+        const target = document.querySelector(`.match[data-id="${m.dropsTo}"]`);
+        if(target){
+          const to = ports(target);
+          curve(from.outX, from.outY + 5, to.inX, to.inY - 5, MAGENTA, true);
+        }
+      }
     });
-    matchEl.classList.add('score-shown');
   }
 
-  document.addEventListener('click', (e)=>{
+  function renderAll(){
+    renderRounds(document.getElementById('upperRounds'), upperGroups);
+    renderRounds(document.getElementById('lowerRounds'), lowerGroups);
+    renderRounds(document.getElementById('grandFinalRound'), gfGroups);
+    renderWatchOrder();
+    requestAnimationFrame(drawLines);
+  }
+
+  // ---- Interactions ------------------------------------------------
+  document.addEventListener('click', (e) => {
     const revealBtn = e.target.closest('.reveal-teams');
+    if(revealBtn){ teamsRevealed.add(revealBtn.dataset.id); renderAll(); return; }
     const scoreBtn = e.target.closest('.reveal-score');
-    if(revealBtn) revealTeams(revealBtn.closest('.match'));
-    if(scoreBtn) revealScore(scoreBtn.closest('.match'));
+    if(scoreBtn){ scoresRevealed.add(scoreBtn.dataset.id); renderAll(); return; }
   });
 
   const toggle = document.getElementById('spoilerToggle');
-  toggle.addEventListener('click', ()=>{
+  toggle.addEventListener('click', () => {
     const on = document.body.classList.toggle('spoilers-on');
     toggle.setAttribute('aria-pressed', on);
     if(on){
-      document.querySelectorAll('.match').forEach(m=>{ revealTeams(m); revealScore(m); });
+      matches.forEach(m => { teamsRevealed.add(m.id); scoresRevealed.add(m.id); });
+    } else {
+      teamsRevealed = new Set(INITIAL_IDS);
+      scoresRevealed = new Set(INITIAL_IDS);
     }
+    renderAll();
   });
+
+  window.addEventListener('resize', () => requestAnimationFrame(drawLines));
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(drawLines); }
+
+  renderAll();
 })();
 </script>
 
