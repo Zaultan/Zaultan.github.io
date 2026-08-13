@@ -7,18 +7,7 @@
 <meta name="description" content="A spoiler-safe VOD hub template: frozen bracket, staged reveals, watch order. Swap in your own tournament.">
 
 <!--
-  TEMPLATE NOTES  (dedlete before shipping)
-  ----------------------------------------
-  This is a structural clone: same section order, nav, bracket shape and
-  reveal mechanic as the reference site, rebuilt with an original visual
-  identity and placeholder copy. No images, video, or text were copied.
 
-  Things to swap in for a real event:
-  1. TOURNAMENT_NAME / dates in the <header> and <footer>
-  2. The `matches` array in the <script> at the bottom (teams, scores, ids)
-  3. The 8 cards in #teams
-  4. The five stat values in #format
-  5. Prize pool amount + split in #prizes
 
 
   [[[[[[[[[[[[Non Vibe Coded to do list]]]]]]]]]]]]
@@ -303,18 +292,6 @@
     font-family:var(--font-mono); font-size:11px; color:var(--mint); margin-top:8px;
   }
 
-  /* ---------- FORMAT STATS ---------- */
-  .stat-grid{
-    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-    gap:1px; background:var(--line); border:1px solid var(--line);
-    border-radius:var(--radius); overflow:hidden; margin-top:32px;
-  }
-  .stat{ background:var(--ink-soft); padding:24px 20px; }
-  .stat .value{ font-family:var(--font-display); font-size:34px; color:var(--amber); }
-  .stat .label{
-    font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
-    text-transform:uppercase; letter-spacing:0.08em; margin-top:4px;
-  }
 
   /* ---------- PRIZE POOL ---------- */
   .prize-card{
@@ -356,7 +333,6 @@
       <a href="#watch-order">Watch Order</a>
       <a href="#bracket">Bracket</a>
       <a href="#teams">Teams</a>
-      <a href="#format">Format</a>
     </nav>
     <button class="spoiler-toggle" id="spoilerToggle" aria-pressed="false">
       SPOILERS
@@ -453,23 +429,6 @@
       <div class="team-card"><div class="flag">H</div><div class="name">Nigma Galaxy</div><div class="seed">SEED 8</div><div class="mmr">Points 1529</div></div>
     </div>
     <p style="max-width:520px;margin-top:10px;">* 1W/Iron Wing rating used</p>
-  </div>
-</section>
-
-<section id="format">
-  <div class="wrap">
-    <p class="eyebrow">The rules</p>
-    <h2>Format</h2>
-    <p style="max-width:600px;margin-top:10px;">Eight teams, double elimination, played over a
-      single weekend. Day one seeds the bracket with best-of-ones; day two runs best-of-threes
-      the rest of the way.</p>
-    <div class="stat-grid">
-      <div class="stat"><div class="value">8</div><div class="label">Teams</div></div>
-      <div class="stat"><div class="value">2X</div><div class="label">Elimination</div></div>
-      <div class="stat"><div class="value">2</div><div class="label">Days</div></div>
-      <div class="stat"><div class="value">13</div><div class="label">Matches</div></div>
-      <div class="stat"><div class="value">EU</div><div class="label">Server region</div></div>
-    </div>
   </div>
 </section>
 
