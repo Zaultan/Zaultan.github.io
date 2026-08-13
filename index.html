@@ -165,36 +165,7 @@
     100%{ box-shadow:0 0 0 0 rgba(99,230,190,0); }
   }
   .hero-note{ max-width:560px; margin-top:18px; font-size:15px; }
-
-  /* ---------- WATCH ORDER ---------- */
-  .order-list{ list-style:none; margin:32px 0 0; padding:0; }
-  .order-item{
-    display:grid; grid-template-columns:56px 1fr auto; gap:18px; align-items:center;
-    padding:16px 0; border-bottom:1px solid var(--line);
-  }
-  .order-item .idx{
-    font-family:var(--font-mono); color:var(--text-dim); font-size:13px;
-  }
-  .order-item .meta{ display:flex; flex-direction:column; gap:2px; grid-column:2; }
-  .order-item .meta .label{ font-weight:600; font-size:15px; }
-  .order-item .meta .stage{
-    font-family:var(--font-mono); font-size:12px; color:var(--text-dim);
-  }
-  .order-item .play{
-    font-family:var(--font-mono); font-size:12px; color:var(--ink);
-    background:var(--amber); border:none; padding:8px 14px; border-radius:6px;
-    cursor:pointer; font-weight:600; white-space:nowrap; text-decoration:none;
-    display:inline-block;
-  }
-  .order-item .play:hover{ filter:brightness(1.08); }
-  .order-item.locked .play{ background:var(--ink-soft-2); color:var(--text-dim); cursor:not-allowed; }
-  .order-item.locked .meta .label{ color:var(--text-dim); font-weight:500; }
-  .warn{
-    font-family:var(--font-mono); font-size:12px; color:var(--text-dim);
-    margin-top:24px; padding:14px; border:1px dashed var(--line-2); border-radius:8px;
-  }
-
-  /* ---------- BRACKET ---------- */
+/* ---------- BRACKET ---------- */
   .bracket-legend{ display:flex; gap:22px; flex-wrap:wrap; margin:26px 0 40px; }
   .bracket-legend .item{
     display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-dim);
@@ -278,6 +249,35 @@
     color:var(--text-dim); margin-top:8px;
   }
 
+  /* ---------- WATCH ORDER ---------- */
+  .order-list{ list-style:none; margin:32px 0 0; padding:0; }
+  .order-item{
+    display:grid; grid-template-columns:56px 1fr auto; gap:18px; align-items:center;
+    padding:16px 0; border-bottom:1px solid var(--line);
+  }
+  .order-item .idx{
+    font-family:var(--font-mono); color:var(--text-dim); font-size:13px;
+  }
+  .order-item .meta{ display:flex; flex-direction:column; gap:2px; grid-column:2; }
+  .order-item .meta .label{ font-weight:600; font-size:15px; }
+  .order-item .meta .stage{
+    font-family:var(--font-mono); font-size:12px; color:var(--text-dim);
+  }
+  .order-item .play{
+    font-family:var(--font-mono); font-size:12px; color:var(--ink);
+    background:var(--amber); border:none; padding:8px 14px; border-radius:6px;
+    cursor:pointer; font-weight:600; white-space:nowrap; text-decoration:none;
+    display:inline-block;
+  }
+  .order-item .play:hover{ filter:brightness(1.08); }
+  .order-item.locked .play{ background:var(--ink-soft-2); color:var(--text-dim); cursor:not-allowed; }
+  .order-item.locked .meta .label{ color:var(--text-dim); font-weight:500; }
+  .warn{
+    font-family:var(--font-mono); font-size:12px; color:var(--text-dim);
+    margin-top:24px; padding:14px; border:1px dashed var(--line-2); border-radius:8px;
+  }
+
+  
   /* ---------- TEAMS ---------- */
   .team-grid{
     display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
@@ -472,15 +472,15 @@
   const matches = [
     { id:'UR1-1', path:'up', roundName:'Round 1', fmt:'BO3',
       teamA:'Xtreme Gaming', teamB:'Tundra Esports', scoreA:2, scoreB:0,
-      games:['https://youtu.be/ke5nzwisv-Q','https://www.youtube.com/watch?v=D84RWQf6-gY',null],
+      games:['https://youtu.be/ke5nzwisv-Q','https://www.youtube.com/watch?v=D84RWQf6-gY','https://zault.net'],
       next:'UR2-1', dropsTo:'LR0-1' },
     { id:'UR1-2', path:'up', roundName:'Round 1', fmt:'BO3',
       teamA:'Parivision', teamB:'Heroic', scoreA:2, scoreB:0,
-      games:['https://youtu.be/lgB8vvhSXmw','https://youtu.be/7J1bIjfKXUk',null],
+      games:['https://youtu.be/lgB8vvhSXmw','https://youtu.be/7J1bIjfKXUk','https://zault.net'],
       next:'UR2-1', dropsTo:'LR0-1' },
     { id:'UR1-3', path:'up', roundName:'Round 1', fmt:'BO3',
       teamA:'Team Tidebound', teamB:'Team Falcons', scoreA:0, scoreB:2,
-      games:['https://www.youtube.com/watch?v=IoRXQU5qoVE','https://www.youtube.com/watch?v=V4kDPzmQfGc',null],
+      games:['https://www.youtube.com/watch?v=IoRXQU5qoVE','https://www.youtube.com/watch?v=V4kDPzmQfGc','https://zault.net'],
       next:'UR2-2', dropsTo:'LR0-2' },
     { id:'UR1-4', path:'up', roundName:'Round 1', fmt:'BO3',
       teamA:'BB Team', teamB:'Nigma Galaxy', scoreA:2, scoreB:1,
@@ -489,16 +489,16 @@
 
     { id:'LR0-1', path:'down', roundName:'Round 1', fmt:'BO3',
       teamA:'Tundra Esports', teamB:'Heroic', scoreA:0, scoreB:2,
-      games:['https://www.youtube.com/watch?v=965LsZIuNpo','https://www.youtube.com/watch?v=bZIqE_la0Dw',null],
+      games:['https://www.youtube.com/watch?v=965LsZIuNpo','https://www.youtube.com/watch?v=bZIqE_la0Dw','https://zault.net'],
       next:'LR1-1', dropsTo:null },
     { id:'LR0-2', path:'down', roundName:'Round 1', fmt:'BO3',
       teamA:'Team Tidebound', teamB:'Nigma Galaxy', scoreA:0, scoreB:2,
-      games:['https://www.youtube.com/watch?v=FkWUJW7m4sg&pp=0gcJCfkLAYcqIYzv','https://www.youtube.com/watch?v=hNWtt-mV0VI',null],
+      games:['https://www.youtube.com/watch?v=FkWUJW7m4sg&pp=0gcJCfkLAYcqIYzv','https://www.youtube.com/watch?v=hNWtt-mV0VI','https://zault.net'],
       next:'LR1-2', dropsTo:null },
 
     { id:'UR2-1', path:'up', roundName:'Round 2', fmt:'BO3',
       teamA:'Xtreme Gaming', teamB:'Parivision', scoreA:0, scoreB:2,
-      games:['https://www.youtube.com/watch?v=dW-C2Cajm-E','https://www.youtube.com/watch?v=lvNl_SSKJpg',null],
+      games:['https://www.youtube.com/watch?v=dW-C2Cajm-E','https://www.youtube.com/watch?v=lvNl_SSKJpg','https://zault.net'],
       next:'UF', dropsTo:'LR1-2' },
     { id:'UR2-2', path:'up', roundName:'Round 2', fmt:'BO3',
       teamA:'Team Falcons', teamB:'BB Team', scoreA:2, scoreB:1,
@@ -511,7 +511,7 @@
       next:'LSF', dropsTo:null },
     { id:'LR1-2', path:'down', roundName:'Round 2', fmt:'BO3',
       teamA:'Xtreme Gaming', teamB:'Nigma Galaxy', scoreA:2, scoreB:0,
-      games:['https://www.youtube.com/watch?v=HLn33oP8cik&pp=0gcJCfkLAYcqIYzv','https://www.youtube.com/watch?v=Dp0_VsS7pHk',null],
+      games:['https://www.youtube.com/watch?v=HLn33oP8cik&pp=0gcJCfkLAYcqIYzv','https://www.youtube.com/watch?v=Dp0_VsS7pHk','https://zault.net'],
       next:'LSF', dropsTo:null },
 
     { id:'UF', path:'up', roundName:'Upper Final', fmt:'BO3',
@@ -521,7 +521,7 @@
 
     { id:'LSF', path:'down', roundName:'Semifinal', fmt:'BO3',
       teamA:'BB Team', teamB:'Xtreme Gaming', scoreA:0, scoreB:2,
-      games:['https://www.youtube.com/watch?v=MBsNs8QE_gY','https://www.youtube.com/watch?v=8LALMXiGx1Q',null],
+      games:['https://www.youtube.com/watch?v=MBsNs8QE_gY','https://www.youtube.com/watch?v=8LALMXiGx1Q','https://zault.net'],
       next:'LF', dropsTo:null },
 
     { id:'LF', path:'down', roundName:'Lower Final', fmt:'BO3',
