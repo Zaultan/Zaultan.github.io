@@ -166,7 +166,10 @@
   }
   .header-note{ max-width:560px; margin-top:18px; font-size:15px; }
 /* ---------- BRACKET ---------- */
-  .bracket-legend{ display:flex; gap:22px; flex-wrap:wrap; margin:26px 0 40px; }
+  .bracket-legend{
+    display:flex; gap:22px; flex-wrap:wrap; margin:26px 0 40px;
+    justify-content:center; text-align:center;
+  }
   .bracket-legend .item{
     display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-dim);
   }
@@ -175,79 +178,152 @@
   .swatch.down{ background:var(--magenta); }
   .swatch.drop{ background:repeating-linear-gradient(90deg, var(--magenta) 0 4px, transparent 4px 8px); }
 
-  .bracket-canvas{ position:relative; overflow-x:auto; padding-bottom:12px; -webkit-overflow-scrolling:touch; }
-  .bracket-lines{ position:absolute; top:0; left:0; pointer-events:none; }
-  .bracket-outer{ position:relative; display:flex; align-items:center; gap:56px; min-width:max-content; }
-  .bracket-stack{ display:flex; flex-direction:column; gap:56px; }
+  .bracket-canvas{
+    position:relative; overflow-x:auto; padding:8px 4px 16px;
+    -webkit-overflow-scrolling:touch;
+  }
+  /* Lines render behind the cards so they never cover match content. */
+  .bracket-lines{ position:absolute; top:0; left:0; pointer-events:none; z-index:0; }
+  .bracket-outer{ position:relative; z-index:1; }
+
+  /* Symmetric layout: 4 equal round tracks + a centred grand-final column.
+     Upper and lower brackets share the same tracks so finals line up. */
+  .bracket-outer{
+    position:relative; display:grid;
+    grid-template-columns:minmax(0,1fr) 226px;
+    align-items:center; gap:0 34px; min-width:max-content;
+  }
+  .bracket-stack{ display:flex; flex-direction:column; gap:24px; }
 
   .bracket-path h3{
-    font-family:var(--font-mono); font-size:13px; letter-spacing:0.1em;
-    text-transform:uppercase; margin-bottom:18px;
+    font-family:var(--font-mono); font-size:12px; letter-spacing:0.14em;
+    text-transform:uppercase; margin:0 0 16px; text-align:center;
+    display:flex; align-items:center; justify-content:center; gap:12px;
+  }
+  .bracket-path h3::before,
+  .bracket-path h3::after{
+    content:''; height:1px; flex:1; max-width:180px;
+    background:linear-gradient(90deg, transparent, var(--line-2), transparent);
   }
   .bracket-path.up h3{ color:var(--amber); }
   .bracket-path.down h3{ color:var(--magenta); }
-  .bracket-path.gf h3{ color:var(--amber); text-align:center; }
+  .bracket-path.gf h3{ color:var(--amber); }
 
-  .round-row{ display:flex; gap:16px; }
+  .round-row{
+    display:grid; grid-template-columns:repeat(4, 196px);
+    justify-content:end; gap:0 26px;
+  }
+  .bracket-path.up .round-row{ grid-template-columns:repeat(3, 196px); }
+  .bracket-path.gf .round-row{ grid-template-columns:226px; justify-content:center; }
+
+  /* header pinned to the top of every track, cards centred inside it */
   .round-col{
-    min-width:190px; flex:1;
-    display:flex; flex-direction:column; justify-content:space-around; gap:14px;
+    position:relative; padding-top:38px;
+    display:flex; flex-direction:column; justify-content:space-evenly;
+    align-items:stretch; gap:18px;
   }
-  .bracket-path.gf .round-col{ min-width:230px; flex:none; }
   .round-col .round-name{
-    font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
-    text-transform:uppercase; letter-spacing:0.08em;
+    position:absolute; top:0; left:0; right:0;
+    font-family:var(--font-mono); font-size:10px; color:var(--text-dim);
+    text-transform:uppercase; letter-spacing:0.14em; text-align:center;
+    padding:5px 0;
+    border:1px solid var(--line); border-radius:999px;
+    background:rgba(242,238,251,0.03);
   }
+
 
   .match{
-    background:var(--ink-soft); border:1px solid var(--line);
-    border-radius:var(--radius); padding:12px; position:relative;
+    background:linear-gradient(180deg, var(--ink-soft-2), var(--ink-soft));
+    border:1px solid var(--line); border-radius:14px;
+    padding:14px 14px 12px; position:relative; overflow:hidden;
+    display:flex; flex-direction:column; gap:2px;
+    box-shadow:0 10px 24px -18px rgba(0,0,0,0.9);
+    transition:border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   }
-  .bracket-path.up .match{ border-left:3px solid var(--amber); }
-  .bracket-path.down .match{ border-left:3px solid var(--magenta); }
-  .bracket-path.gf .match{ border-left:3px solid var(--amber); }
+  .match:hover{
+    border-color:var(--line-2); transform:translateY(-2px);
+    box-shadow:0 16px 30px -20px rgba(0,0,0,1);
+  }
+  /* accent as a symmetric top rail rather than a left edge */
+  .match::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  }
+  .bracket-path.up .match::before{
+    background:linear-gradient(90deg, transparent, var(--amber), transparent);
+  }
+  .bracket-path.down .match::before{
+    background:linear-gradient(90deg, transparent, var(--magenta), transparent);
+  }
+  .bracket-path.gf .match::before{
+    background:linear-gradient(90deg, var(--magenta), var(--amber), var(--magenta));
+  }
+  .bracket-path.gf .match{ border-color:var(--line-2); }
+
   .match-head{
     display:flex; justify-content:space-between; align-items:center;
-    font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
-    margin-bottom:10px;
+    font-family:var(--font-mono); font-size:10px; letter-spacing:0.1em;
+    color:var(--text-dim); margin-bottom:8px;
+  }
+  .match-head span:last-child{
+    border:1px solid var(--line); border-radius:999px; padding:2px 7px;
   }
   .team-row{
-    display:flex; justify-content:space-between; align-items:center;
-    padding:5px 0; font-size:14px;
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding:6px 8px; font-size:14px; border-radius:8px;
+    background:rgba(242,238,251,0.03);
   }
-  .team-row .name{ font-weight:600; letter-spacing:0.01em; }
+  .team-row + .team-row{ margin-top:6px; }
+  .team-row .name{
+    font-weight:600; letter-spacing:0.01em; overflow:hidden;
+    text-overflow:ellipsis; white-space:nowrap;
+  }
   .team-row .name.placeholder{ color:var(--text-dim); font-weight:400; letter-spacing:0.12em; }
-  .team-row .score{ font-family:var(--font-mono); color:var(--text-dim); }
+  .team-row .score{
+    font-family:var(--font-mono); font-size:12px; color:var(--text-dim);
+    min-width:24px; text-align:center; padding:2px 0; border-radius:6px;
+    background:rgba(242,238,251,0.05);
+  }
   .match.score-shown .team-row .score{ color:var(--text); }
 
-  .games-row{ display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+  .games-row{
+    display:grid; grid-auto-flow:column; grid-auto-columns:1fr;
+    gap:6px; margin-top:12px;
+  }
   .game-btn{
-    font-family:var(--font-mono); font-size:11px; padding:5px 8px; border-radius:5px;
+    font-family:var(--font-mono); font-size:11px; padding:6px 0; border-radius:6px;
     border:1px solid var(--line-2); text-decoration:none; line-height:1;
+    text-align:center;
   }
   .game-btn.active{ background:var(--amber); color:var(--ink); font-weight:700; }
   .game-btn.active:hover{ filter:brightness(1.08); text-decoration:none; }
   .game-btn.locked{ background:var(--ink-soft-2); color:var(--text-dim); cursor:not-allowed; }
   .game-btn.unplayed{ background:transparent; color:var(--text-dim); opacity:0.35; text-decoration:line-through; cursor:default; }
 
-  .advance{
-    margin-top:10px; padding-top:8px; border-top:1px dashed var(--line);
-    font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
+  .match-foot{
+    margin-top:12px; padding-top:10px; border-top:1px dashed var(--line);
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
   }
-  .advance.drop{ border-top:none; padding-top:0; margin-top:4px; color:var(--magenta); font-size:10px; }
+  .advance-group{ display:flex; flex-direction:column; justify-content:center; gap:2px; min-width:0; min-height:28px; }
+  .advance{
+    font-family:var(--font-mono); font-size:10px; letter-spacing:0.04em;
+    color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .advance.drop{ color:var(--magenta); }
 
-  .match-actions{ display:flex; gap:6px; margin-top:10px; min-height:26px; }
+  .match-actions{ display:flex; gap:6px; min-height:26px; }
   .match-actions button{
     font-family:var(--font-mono); font-size:12px; background:var(--ink-soft-2);
     border:1px solid var(--line-2); color:var(--text-dim);
-    width:30px; height:26px; border-radius:6px; cursor:pointer;
+    width:28px; height:26px; border-radius:8px; cursor:pointer;
   }
-  .match-actions button:hover{ color:var(--text); }
+  .match-actions button:hover{ color:var(--text); border-color:var(--mint); }
 
   .final-note{
-    text-align:center; font-family:var(--font-mono); font-size:12px;
-    color:var(--text-dim); margin-top:8px;
+    text-align:center; font-family:var(--font-mono); font-size:11px;
+    letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--text-dim); margin-top:12px;
   }
+
 
   /* ---------- WATCH ORDER ---------- */
   .order-list{ list-style:none; margin:32px 0 0; padding:0; }
@@ -331,8 +407,9 @@
     section{ padding:64px 0; }
     .order-item{ grid-template-columns:36px 1fr; }
     .order-item .play{ grid-column:2; justify-self:start; }
-    .bracket-outer{ gap:32px; }
-    .bracket-stack{ gap:36px; }
+    .bracket-outer{ grid-template-columns:minmax(0,1fr) 236px; gap:0 28px; }
+    .round-row{ grid-template-columns:repeat(4, 178px); gap:0 22px; }
+    .bracket-path.up .round-row{ grid-template-columns:repeat(3, 178px); }
   }
 </style>
 </head>
@@ -596,10 +673,12 @@
           <span class="score">${scored ? m.scoreB : '—'}</span>
         </div>
         <div class="games-row">${gamesHTML}</div>
-        ${advanceHTML}
-        <div class="match-actions">
-          <button class="reveal-teams" data-id="${m.id}" title="Reveal matchup" style="${shown ? 'display:none' : ''}">👁</button>
-          <button class="reveal-score" data-id="${m.id}" title="Reveal score" style="${(!shown || scored) ? 'display:none' : ''}">?</button>
+        <div class="match-foot">
+          <div class="advance-group">${advanceHTML}</div>
+          <div class="match-actions">
+            <button class="reveal-teams" data-id="${m.id}" title="Reveal matchup" style="${shown ? 'display:none' : ''}">👁</button>
+            <button class="reveal-score" data-id="${m.id}" title="Reveal score" style="${(!shown || scored) ? 'display:none' : ''}">?</button>
+          </div>
         </div>
       </div>`;
   }
@@ -665,21 +744,45 @@
 
     function ports(el){
       const r = el.getBoundingClientRect();
+      const x = r.left - canvasRect.left + canvas.scrollLeft;
+      const y = r.top  - canvasRect.top  + canvas.scrollTop;
       return {
-        outX: r.right - canvasRect.left + canvas.scrollLeft,
-        outY: r.top + r.height/2 - canvasRect.top + canvas.scrollTop,
-        inX:  r.left - canvasRect.left + canvas.scrollLeft,
-        inY:  r.top + r.height/2 - canvasRect.top + canvas.scrollTop,
+        leftX:  x,
+        rightX: x + r.width,
+        cx:     x + r.width / 2,
+        cy:     y + r.height / 2,
+        topY:   y,
+        botY:   y + r.height,
       };
     }
-    function curve(x1,y1,x2,y2,color,dashed){
+    // Smooth S-curve for forward (next) links — travels inside the column gutter.
+    function curve(x1,y1,x2,y2,color){
       const mx = (x1+x2)/2;
       const path = document.createElementNS('http://www.w3.org/2000/svg','path');
       path.setAttribute('d', `M ${x1} ${y1} C ${mx} ${y1} ${mx} ${y2} ${x2} ${y2}`);
       path.setAttribute('stroke', color);
-      path.setAttribute('stroke-width', '2');
+      path.setAttribute('stroke-width', '1.75');
       path.setAttribute('fill', 'none');
-      if(dashed) path.setAttribute('stroke-dasharray', '6 5');
+      path.setAttribute('stroke-linecap', 'round');
+      svg.appendChild(path);
+    }
+    // Orthogonal "elbow" routed through the empty gutter to the right of the
+    // column, so drop lines never cut across stacked match cards.
+    function elbowDrop(from, to){
+      const sx = from.rightX + 4;          // leave a small gap off the source
+      const sy = from.cy;
+      const tx = to.rightX + 4;            // enter the target's right side (gap)
+      const ty = to.cy;
+      const busX = Math.max(from.rightX, to.rightX) + 16; // right-side gutter
+      const d = `M ${sx} ${sy} L ${busX} ${sy} L ${busX} ${ty} L ${tx} ${ty}`;
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d', d);
+      path.setAttribute('stroke', MAGENTA);
+      path.setAttribute('stroke-width', '1.6');
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke-linecap', 'round');
+      path.setAttribute('stroke-linejoin', 'round');
+      path.setAttribute('stroke-dasharray', '6 5');
       svg.appendChild(path);
     }
 
@@ -691,14 +794,15 @@
         const target = document.querySelector(`.match[data-id="${m.next}"]`);
         if(target){
           const to = ports(target);
-          curve(from.outX, from.outY, to.inX, to.inY, m.path === 'down' ? MAGENTA : AMBER, false);
+          // 4px gap at each end so lines don't kiss the card borders.
+          curve(from.rightX + 4, from.cy, to.leftX - 4, to.cy,
+                m.path === 'down' ? MAGENTA : AMBER);
         }
       }
       if(m.dropsTo){
         const target = document.querySelector(`.match[data-id="${m.dropsTo}"]`);
         if(target){
-          const to = ports(target);
-          curve(from.outX, from.outY + 5, to.inX, to.inY - 5, MAGENTA, true);
+          elbowDrop(from, ports(target));
         }
       }
     });
