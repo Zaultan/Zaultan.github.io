@@ -799,12 +799,6 @@
                 m.path === 'down' ? MAGENTA : AMBER);
         }
       }
-      if(m.dropsTo){
-        const target = document.querySelector(`.match[data-id="${m.dropsTo}"]`);
-        if(target){
-          elbowDrop(from, ports(target));
-        }
-      }
     });
   }
 
