@@ -26,6 +26,15 @@
   2. Add buttons for game 1 2 3 even if there is no game 3, each button goes to a different vod
   3. Make Upper Bracket Round 1 start revealed with 3 buttons for game 1 2 3 which act as a hyperlink to the match video web page.
   4. Add logic to the Watch Order section so that it only actually shows the links for the games that have been revealed in the bracket. The rest of the games should be hidden until they are revealed in the bracket.
+  5. Make the Rounds vertically offset so that the Upper Bracket and Lower Bracket progress is easier to follow. 
+  6. Move the Grand final to the right of the Lower Bracket and Upper Bracket so that it is easier to see the progression of the tournament.
+  7. Add lines between each round to show the progression of the tournament. The lines should connect the matches in each round to the next round. The lines should be colored based on the bracket path (Upper Bracket = Amber, Lower Bracket = Magenta).
+  8. Add dashed lines bewtween the Upper Bracket and Lower Bracket to show where loseing teams go.
+
+
+
+
+
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -469,9 +478,8 @@
     <h2>Prize Pool</h2>
     <div class="prize-card">
       <div class="prize-total">$2,881,791</div>
-      <p style="margin-top:4px;">Split between the top four finishers. Who took which cut stays
-        behind the spoiler switch.</p>
-      <div class="split-bar"><span></span><span></span><span></span><span></span></div>
+      <p style="margin-top:4px;">Tournament Split of prize pools and their percentages</p>
+      <div class="split-bar"><span></span><span></span><span></span><span></span><span></span></div> <!-- Added 1 more span to see if it works the way I think -->
       <div class="split-legend">
         <span>42.5% — <span class="who">1st $1,224,732 </span></span>
         <span>13% — <span class="who">2nd: $374,676 </span></span>
@@ -500,16 +508,16 @@
   const upperRounds = [
     { name:'Round 1', matches:[
       { id:'UR1-1', fmt:'BO1', teamA:'Xtreme Gaming', teamB:'Tundra Esports', scoreA:2, scoreB:0, advance:'→ Round 2 · M1' },
-      { id:'UR1-2', fmt:'BO1', teamA:'Parivision', teamB:'Heroic', scoreA:2, scoreB:1, advance:'→ Round 2 · M1' },
-      { id:'UR1-3', fmt:'BO1', teamA:'Team Tidebound', teamB:'Team Falcons', scoreA:2, scoreB:0, advance:'→ Round 2 · M2' },
+      { id:'UR1-2', fmt:'BO1', teamA:'Parivision', teamB:'Heroic', scoreA:2, scoreB:0, advance:'→ Round 2 · M1' },
+      { id:'UR1-3', fmt:'BO1', teamA:'Team Tidebound', teamB:'Team Falcons', scoreA:0, scoreB:2, advance:'→ Round 2 · M2' },
       { id:'UR1-4', fmt:'BO1', teamA:'BB Team', teamB:'Nigma Galaxy', scoreA:2, scoreB:1, advance:'→ Round 2 · M2' },
     ]},
     { name:'Round 2', matches:[
-      { id:'UR2-1', fmt:'BO1', teamA:'Winner UR1-1', teamB:'Winner UR1-2', scoreA:2, scoreB:1, advance:'→ Upper Final' },
-      { id:'UR2-2', fmt:'BO1', teamA:'Winner UR1-3', teamB:'Winner UR1-4', scoreA:1, scoreB:2, advance:'→ Upper Final' },
+      { id:'UR2-1', fmt:'BO1', teamA:'Xtreme Gaming1', teamB:'Parivision', scoreA:0, scoreB:2, advance:'→ Upper Final' },
+      { id:'UR2-2', fmt:'BO1', teamA:'Team Falcons', teamB:'BB Team', scoreA:2, scoreB:1, advance:'→ Upper Final' },
     ]},
     { name:'Upper Final', matches:[
-      { id:'UF', fmt:'BO3', teamA:'Winner UR2-1', teamB:'Winner UR2-2', scoreA:2, scoreB:0, advance:'→ Grand Final' },
+      { id:'UF', fmt:'BO3', teamA:'Parivision', teamB:'Team Falcons', scoreA:2, scoreB:0, advance:'→ Grand Final' },
     ]},
   ];
 
