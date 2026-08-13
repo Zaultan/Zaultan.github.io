@@ -7,96 +7,18 @@
 <meta name="description" content="A spoiler-safe VOD hub template: frozen bracket, staged reveals, watch order. Swap in your own tournament.">
 
 <!--
+  TEMPLATE NOTES (delete before shipping)
+  ----------------------------------------
+  This is a structural clone: same section order, nav, bracket shape and
+  reveal mechanic as the reference site, rebuilt with an original visual
+  identity and placeholder copy. No images, video, or text were copied.
 
-backup
-
-  [[[[[[[[[[[[Non Vibe Coded to do list]]]]]]]]]]]]
-  2. Add buttons for game 1 2 3 even if there is no game 3, each button goes to a different vod
-  3. Make Upper Bracket Round 1 start revealed with 3 buttons for game 1 2 3 which act as a hyperlink to the match video web page.
-  4. Add logic to the Watch Order section so that it only actually shows the links for the games that have been revealed in the bracket. The rest of the games should be hidden until they are revealed in the bracket.
-  5. Make the Rounds vertically offset so that the Upper Bracket and Lower Bracket progress is easier to follow. 
-  6. Move the Grand final to the right of the Lower Bracket and Upper Bracket so that it is easier to see the progression of the tournament.
-  7. Add lines between each round to show the progression of the tournament. The lines should connect the matches in each round to the next round. The lines should be colored based on the bracket path (Upper Bracket = Amber, Lower Bracket = Magenta).
-  8. Add dashed lines bewtween the Upper Bracket and Lower Bracket to show where loseing teams go.
-
-Links for matches are below 
-Upper Bracket
-    Round 1
-        Match 1: Xtreme Vs Tundra
-            Game 1: https://youtu.be/ke5nzwisv-Q
-            Game 2: https://www.youtube.com/watch?v=D84RWQf6-gY
-            Game 3:
-        Match 2: Para Vs Hero
-            Game 1: https://youtu.be/lgB8vvhSXmw
-            Game 2: https://youtu.be/7J1bIjfKXUk
-            Game 3:
-        Match 3: Tide vs Falc
-            Game 1: https://www.youtube.com/watch?v=IoRXQU5qoVE
-            Game 2: https://www.youtube.com/watch?v=V4kDPzmQfGc
-            Game 3:
-        Match 4:  BB vs Nigma
-            Game 1: https://www.youtube.com/watch?v=np7QK-Qkc70
-            Game 2: https://www.youtube.com/watch?v=Ioxq_neNoj4&pp=0gcJCfkLAYcqIYzv
-            Game 3: https://www.youtube.com/watch?v=yOGrD4cFBG4
-    Round 2
-        Match 1: Xtreme Vs Para
-            Game 1: https://www.youtube.com/watch?v=dW-C2Cajm-E
-            Game 2: https://www.youtube.com/watch?v=lvNl_SSKJpg
-            Game 3:
-        Match 2: Falc vs BB
-            Game 1: https://www.youtube.com/watch?v=Z9Fg-P10glo
-            Game 2: https://www.youtube.com/watch?v=yK10CCR6U6A
-            Game 3: https://www.youtube.com/watch?v=zyo61kPZU64 
-    Round 3
-        Match 3: Para vs Falc
-            Game 1: https://www.youtube.com/watch?v=59TwKSEAWX4
-            Game 2: https://www.youtube.com/watch?v=aOJ_l3PL-Ys
-            Game 3: https://www.youtube.com/watch?v=LepJpEs_2ts 
-
-
-
-
-Lower
-    Round 1
-        Match 1: Tundra Vs Hero
-            Game 1: https://www.youtube.com/watch?v=965LsZIuNpo
-            Game 2: https://www.youtube.com/watch?v=bZIqE_la0Dw
-            Game 3:
-        Match 2: Tide Vs Nigma
-            Game 1: https://www.youtube.com/watch?v=FkWUJW7m4sg&pp=0gcJCfkLAYcqIYzv
-            Game 2: https://www.youtube.com/watch?v=hNWtt-mV0VI
-            Game 3:
-    Round 2
-        Match 1: BB Vs Hero
-            Game 1: https://www.youtube.com/watch?v=YEP1oUO43L4
-            Game 2: https://www.youtube.com/watch?v=qqgxs_bg29Q
-            Game 3: https://www.youtube.com/watch?v=Vw2suZTSIR0 
-        Match 2: Xtreme Vs Nigma
-            Game 1: https://www.youtube.com/watch?v=HLn33oP8cik&pp=0gcJCfkLAYcqIYzv 
-            Game 2: https://www.youtube.com/watch?v=Dp0_VsS7pHk
-            Game 3:
-    Round 3
-        Match 1: BB vs Xtreme
-            Game 1: https://www.youtube.com/watch?v=MBsNs8QE_gY
-            Game 2: https://www.youtube.com/watch?v=8LALMXiGx1Q
-            Game 3: 
-    Round 4
-        Match 1: Para vs Xtreme
-            Game 1: https://www.youtube.com/watch?v=bMjOS94IFjo 
-            Game 2: https://www.youtube.com/watch?v=4WdegZkxAAE 
-            Game 3: https://www.youtube.com/watch?v=OOmS0V_V4IA 
-
-
-
-GF
-    Match 1: Falc vs Xtreme
-        Game 1: https://www.youtube.com/watch?v=ahknoefViss
-        Game 2: https://www.youtube.com/watch?v=nNJtSWsVPdM&pp=0gcJCfkLAYcqIYzv
-        Game 3: https://www.youtube.com/watch?v=UfET_n7n2NA
-        Game 4: https://www.youtube.com/watch?v=lA6bxkJca3Y&pp=0gcJCfkLAYcqIYzv
-        Game 5: https://www.youtube.com/watch?v=cHvTjBIX53c
-
-
+  Things to swap in for a real event:
+  1. TOURNAMENT_NAME / dates in the <header> and <footer>
+  2. The `matches` array in the <script> at the bottom (teams, scores, ids)
+  3. The 8 cards in #teams
+  4. The five stat values in #format
+  5. Prize pool amount + split in #prizes
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -365,6 +287,18 @@ GF
     font-family:var(--font-mono); font-size:11px; color:var(--mint); margin-top:8px;
   }
 
+  /* ---------- FORMAT STATS ---------- */
+  .stat-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:1px; background:var(--line); border:1px solid var(--line);
+    border-radius:var(--radius); overflow:hidden; margin-top:32px;
+  }
+  .stat{ background:var(--ink-soft); padding:24px 20px; }
+  .stat .value{ font-family:var(--font-display); font-size:34px; color:var(--amber); }
+  .stat .label{
+    font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
+    text-transform:uppercase; letter-spacing:0.08em; margin-top:4px;
+  }
 
   /* ---------- PRIZE POOL ---------- */
   .prize-card{
@@ -373,11 +307,10 @@ GF
   }
   .prize-total{ font-family:var(--font-display); font-size:48px; color:var(--amber); }
   .split-bar{ display:flex; height:14px; border-radius:999px; overflow:hidden; margin:20px 0 14px; }
-  .split-bar span:nth-child(1){ background:var(--amber); width:42.5%; }
-  .split-bar span:nth-child(2){ background:var(--mint); width:13%; }
-  .split-bar span:nth-child(3){ background:var(--magenta); width:9%; }
-  .split-bar span:nth-child(4){ background:var(--text-dim); width:6%; }
-  .split-bar span:nth-child(5){ background:var(--amber); width:29.5%; }
+  .split-bar span:nth-child(1){ background:var(--amber); width:50%; }
+  .split-bar span:nth-child(2){ background:var(--mint); width:25%; }
+  .split-bar span:nth-child(3){ background:var(--magenta); width:15%; }
+  .split-bar span:nth-child(4){ background:var(--text-dim); width:10%; }
   .split-legend{ display:flex; gap:22px; flex-wrap:wrap; font-size:13px; color:var(--text-dim); }
   .split-legend .who{ font-family:var(--font-mono); color:var(--text-dim); }
   body.spoilers-on .split-legend .who{ color:var(--text); }
@@ -406,6 +339,7 @@ GF
       <a href="#watch-order">Watch Order</a>
       <a href="#bracket">Bracket</a>
       <a href="#teams">Teams</a>
+      <a href="#format">Format</a>
     </nav>
     <button class="spoiler-toggle" id="spoilerToggle" aria-pressed="false">
       SPOILERS
@@ -486,22 +420,39 @@ GF
   </div>
 </section>
 
-<section id="te</div>ams">
+<section id="teams">
   <div class="wrap">
     <p class="eyebrow">The field</p>
-    <h2>Participants</h2>
-    <p style="max-width:520px;margin-top:10px;">Team Ratings taken from Liquipedia on 2026-08-02</p>
+    <h2>Eight Teams</h2>
+    <p style="max-width:520px;margin-top:10px;">Rosters as locked before day one. Seeds reflect
+      pre-event ratings, not results.</p>
     <div class="team-grid">
-      <div class="team-card"><div class="flag">A</div><div class="name">Xtreme Gaming</div><div class="seed">SEED 1</div><div class="mmr">Points 1653</div></div>
-      <div class="team-card"><div class="flag">B</div><div class="name">Tundra Esport</div><div class="seed">SEED 2</div><div class="mmr">Points 1487</div></div>
-      <div class="team-card"><div class="flag">C</div><div class="name">Parivision</div><div class="seed">SEED 3</div><div class="mmr">Points 1766</div></div>
-      <div class="team-card"><div class="flag">D</div><div class="name">Heroic</div><div class="seed">SEED 4</div><div class="mmr">Points  ???</div></div>
-      <div class="team-card"><div class="flag">E</div><div class="name">Team Tidebound</div><div class="seed">SEED 5</div><div class="mmr">Points ???</div></div>
-      <div class="team-card"><div class="flag">F</div><div class="name">Team Falcons</div><div class="seed">SEED 6</div><div class="mmr">Points 1750</div></div>
-      <div class="team-card"><div class="flag">G</div><div class="name">BB Team</div><div class="seed">SEED 7</div><div class="mmr">Points 1778</div></div>
-      <div class="team-card"><div class="flag">H</div><div class="name">Nigma Galaxy</div><div class="seed">SEED 8</div><div class="mmr">Points 1529</div></div>
+      <div class="team-card"><div class="flag">A</div><div class="name">Team Aurora</div><div class="seed">SEED 1</div><div class="mmr">RATING 6120</div></div>
+      <div class="team-card"><div class="flag">B</div><div class="name">Team Basalt</div><div class="seed">SEED 2</div><div class="mmr">RATING 6045</div></div>
+      <div class="team-card"><div class="flag">C</div><div class="name">Team Cobalt</div><div class="seed">SEED 3</div><div class="mmr">RATING 5980</div></div>
+      <div class="team-card"><div class="flag">D</div><div class="name">Team Delta</div><div class="seed">SEED 4</div><div class="mmr">RATING 5910</div></div>
+      <div class="team-card"><div class="flag">E</div><div class="name">Team Ember</div><div class="seed">SEED 5</div><div class="mmr">RATING 5840</div></div>
+      <div class="team-card"><div class="flag">F</div><div class="name">Team Fathom</div><div class="seed">SEED 6</div><div class="mmr">RATING 5790</div></div>
+      <div class="team-card"><div class="flag">G</div><div class="name">Team Griffon</div><div class="seed">SEED 7</div><div class="mmr">RATING 5705</div></div>
+      <div class="team-card"><div class="flag">H</div><div class="name">Team Halyard</div><div class="seed">SEED 8</div><div class="mmr">RATING 5630</div></div>
     </div>
-    <p style="max-width:520px;margin-top:10px;">* 1W/Iron Wing rating used</p>
+  </div>
+</section>
+
+<section id="format">
+  <div class="wrap">
+    <p class="eyebrow">The rules</p>
+    <h2>Format</h2>
+    <p style="max-width:600px;margin-top:10px;">Eight teams, double elimination, played over a
+      single weekend. Day one seeds the bracket with best-of-ones; day two runs best-of-threes
+      the rest of the way.</p>
+    <div class="stat-grid">
+      <div class="stat"><div class="value">8</div><div class="label">Teams</div></div>
+      <div class="stat"><div class="value">2X</div><div class="label">Elimination</div></div>
+      <div class="stat"><div class="value">2</div><div class="label">Days</div></div>
+      <div class="stat"><div class="value">13</div><div class="label">Matches</div></div>
+      <div class="stat"><div class="value">EU</div><div class="label">Server region</div></div>
+    </div>
   </div>
 </section>
 
@@ -510,15 +461,15 @@ GF
     <p class="eyebrow">Community-funded</p>
     <h2>Prize Pool</h2>
     <div class="prize-card">
-      <div class="prize-total">$2,881,791</div>
-      <p style="margin-top:4px;">Tournament Split of prize pools and their percentages</p>
-      <div class="split-bar"><span></span><span></span><span></span><span></span><span></span></div> <!-- Added 1 more span to see if it works the way I think -->
+      <div class="prize-total">$0,000</div>
+      <p style="margin-top:4px;">Split between the top four finishers. Who took which cut stays
+        behind the spoiler switch.</p>
+      <div class="split-bar"><span></span><span></span><span></span><span></span></div>
       <div class="split-legend">
-        <span>42.5% — <span class="who">1st $1,224,732 </span></span>
-        <span>13% — <span class="who">2nd: $374,676 </span></span>
-        <span>9% — <span class="who">3rd: $259,319	 </span></span>
-        <span>6% — <span class="who">4th: $172,918	 </span></span>
-        <span>1% — <span class="who">5-16th: $172,918	 </span></span>
+        <span>50% — <span class="who">1st: ??? </span></span>
+        <span>25% — <span class="who">2nd: ??? </span></span>
+        <span>15% — <span class="who">3rd: ??? </span></span>
+        <span>10% — <span class="who">4th: ??? </span></span>
       </div>
     </div>
   </div>
@@ -540,17 +491,17 @@ GF
   // else (ids, rounds, advance labels) just describes bracket shape.
   const upperRounds = [
     { name:'Round 1', matches:[
-      { id:'UR1-1', fmt:'BO1', teamA:'Xtreme Gaming', teamB:'Tundra Esports', scoreA:2, scoreB:0, advance:'→ Round 2 · M1' },
-      { id:'UR1-2', fmt:'BO1', teamA:'Parivision', teamB:'Heroic', scoreA:2, scoreB:0, advance:'→ Round 2 · M1' },
-      { id:'UR1-3', fmt:'BO1', teamA:'Team Tidebound', teamB:'Team Falcons', scoreA:0, scoreB:2, advance:'→ Round 2 · M2' },
-      { id:'UR1-4', fmt:'BO1', teamA:'BB Team', teamB:'Nigma Galaxy', scoreA:2, scoreB:1, advance:'→ Round 2 · M2' },
+      { id:'UR1-1', fmt:'BO1', teamA:'Team A', teamB:'Team B', scoreA:2, scoreB:0, advance:'→ Round 2 · M1' },
+      { id:'UR1-2', fmt:'BO1', teamA:'Team C', teamB:'Team D', scoreA:2, scoreB:1, advance:'→ Round 2 · M1' },
+      { id:'UR1-3', fmt:'BO1', teamA:'Team E', teamB:'Team F', scoreA:2, scoreB:0, advance:'→ Round 2 · M2' },
+      { id:'UR1-4', fmt:'BO1', teamA:'Team G', teamB:'Team H', scoreA:2, scoreB:1, advance:'→ Round 2 · M2' },
     ]},
     { name:'Round 2', matches:[
-      { id:'UR2-1', fmt:'BO1', teamA:'Xtreme Gaming1', teamB:'Parivision', scoreA:0, scoreB:2, advance:'→ Upper Final' },
-      { id:'UR2-2', fmt:'BO1', teamA:'Team Falcons', teamB:'BB Team', scoreA:2, scoreB:1, advance:'→ Upper Final' },
+      { id:'UR2-1', fmt:'BO1', teamA:'Winner UR1-1', teamB:'Winner UR1-2', scoreA:2, scoreB:1, advance:'→ Upper Final' },
+      { id:'UR2-2', fmt:'BO1', teamA:'Winner UR1-3', teamB:'Winner UR1-4', scoreA:1, scoreB:2, advance:'→ Upper Final' },
     ]},
     { name:'Upper Final', matches:[
-      { id:'UF', fmt:'BO3', teamA:'Parivision', teamB:'Team Falcons', scoreA:2, scoreB:0, advance:'→ Grand Final' },
+      { id:'UF', fmt:'BO3', teamA:'Winner UR2-1', teamB:'Winner UR2-2', scoreA:2, scoreB:0, advance:'→ Grand Final' },
     ]},
   ];
 
