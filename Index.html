@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REPLAY BLOCK · Tournament VOD Hub</title>
+<meta name="description" content="A spoiler-safe VOD hub template: frozen bracket, staged reveals, watch order. Swap in your own tournament.">
+
+<!--
+  TEMPLATE NOTES (delete before shipping)
+  ----------------------------------------
+  This is a structural clone: same section order, nav, bracket shape and
+  reveal mechanic as the reference site, rebuilt with an original visual
+  identity and placeholder copy. No images, video, or text were copied.
+
+  Things to swap in for a real event:
+  1. TOURNAMENT_NAME / dates in the <header> and <footer>
+  2. The `matches` array in the <script> at the bottom (teams, scores, ids)
+  3. The 8 cards in #teams
+  4. The five stat values in #format
+  5. Prize pool amount + split in #prizes
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:        #0c0a17;
+    --ink-soft:   #161228;
+    --ink-soft-2: #1f1a38;
+    --line:       rgba(242,238,251,0.10);
+    --line-2:     rgba(242,238,251,0.18);
+    --text:       #f2eefb;
+    --text-dim:   #9f93bf;
+    --amber:      #f5b400;   /* upper bracket / winners path */
+    --magenta:    #ff3d81;   /* lower bracket / elimination path */
+    --mint:       #63e6be;   /* links, focus, interactive accents */
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body:    'Inter', system-ui, sans-serif;
+    --font-mono:    'IBM Plex Mono', monospace;
+    --radius: 10px;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+  }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(245,180,0,0.10), transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, rgba(255,61,129,0.10), transparent 55%),
+      var(--ink);
+    color:var(--text);
+    font-family:var(--font-body);
+    line-height:1.5;
+  }
+
+  a{ color:var(--mint); text-decoration:none; }
+  a:hover{ text-decoration:underline; }
+  :focus-visible{ outline:2px solid var(--mint); outline-offset:3px; border-radius:4px; }
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
+  section{ padding:88px 0; border-top:1px solid var(--line); }
+  section:first-of-type{ border-top:none; }
+
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    margin:0 0 10px;
+  }
+  h1,h2,h3{ font-family:var(--font-display); letter-spacing:0.02em; margin:0; }
+  h2{ font-size:clamp(28px,4vw,42px); }
+  p{ color:var(--text-dim); }
+
+  /* ---------- NAV ---------- */
+  header.nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(12,10,23,0.88);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-row{
+    max-width:1180px; margin:0 auto; padding:14px 24px;
+    display:flex; align-items:center; gap:24px; flex-wrap:wrap;
+  }
+  .brand{
+    font-family:var(--font-display); font-size:22px; letter-spacing:0.03em;
+    display:flex; align-items:center; gap:8px; color:var(--text);
+  }
+  .brand .dot{ color:var(--amber); }
+  .nav-links{ display:flex; gap:18px; flex-wrap:wrap; margin-right:auto; }
+  .nav-links a{
+    color:var(--text-dim); font-size:14px; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.04em;
+  }
+  .nav-links a:hover{ color:var(--text); text-decoration:none; }
+
+  /* Spoiler toggle — signature element, styled like a mechanical tally */
+  .spoiler-toggle{
+    display:flex; align-items:center; gap:10px;
+    background:var(--ink-soft); border:1px solid var(--line-2);
+    border-radius:999px; padding:6px 8px 6px 14px; cursor:pointer;
+    font-family:var(--font-mono); font-size:12px; color:var(--text-dim);
+  }
+  .spoiler-toggle .reel{
+    position:relative; width:46px; height:22px; overflow:hidden;
+    border-radius:6px; background:var(--ink); border:1px solid var(--line-2);
+  }
+  .spoiler-toggle .reel-track{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    transition:transform 0.35s ease;
+    transform:translateY(0%);
+  }
+  .spoiler-toggle .reel-track span{
+    height:22px; display:flex; align-items:center; justify-content:center;
+    font-weight:600; letter-spacing:0.05em;
+  }
+  .spoiler-toggle .reel-track span:first-child{ color:var(--text-dim); }
+  .spoiler-toggle .reel-track span:last-child{ color:var(--amber); }
+  body.spoilers-on .spoiler-toggle .reel-track{ transform:translateY(-50%); }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:96px 0 72px;
+    border-top:none;
+    position:relative;
+  }
+  .hero-media{
+    height:220px; border-radius:16px; margin-bottom:36px;
+    background:
+      repeating-linear-gradient(115deg, rgba(245,180,0,0.10) 0 2px, transparent 2px 26px),
+      linear-gradient(135deg, var(--ink-soft-2), var(--ink-soft) 60%);
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .hero-media span{
+    font-family:var(--font-mono); font-size:12px; color:var(--text-dim);
+    letter-spacing:0.12em; text-transform:uppercase;
+  }
+  .hero h1{ font-size:clamp(44px,8vw,84px); line-height:0.95; }
+  .hero .sub{
+    font-family:var(--font-mono); font-size:14px; color:var(--amber);
+    letter-spacing:0.1em; margin-top:14px;
+  }
+  .shield-badge{
+    display:inline-flex; align-items:center; gap:8px; margin-top:28px;
+    background:var(--ink-soft); border:1px solid var(--line-2);
+    padding:8px 14px; border-radius:999px;
+    font-family:var(--font-mono); font-size:12px; color:var(--mint);
+  }
+  .shield-badge .pulse{
+    width:8px; height:8px; border-radius:50%; background:var(--mint);
+    box-shadow:0 0 0 0 rgba(99,230,190,0.6); animation:pulse 2s infinite;
+  }
+  @keyframes pulse{
+    0%{ box-shadow:0 0 0 0 rgba(99,230,190,0.5); }
+    70%{ box-shadow:0 0 0 10px rgba(99,230,190,0); }
+    100%{ box-shadow:0 0 0 0 rgba(99,230,190,0); }
+  }
+  .hero-note{ max-width:560px; margin-top:18px; font-size:15px; }
+
+  /* ---------- WATCH ORDER ---------- */
+  .order-list{ list-style:none; margin:32px 0 0; padding:0; }
+  .order-item{
+    display:grid; grid-template-columns:56px 1fr auto; gap:18px; align-items:center;
+    padding:16px 0; border-bottom:1px solid var(--line);
+  }
+  .order-item .idx{
+    font-family:var(--font-mono); color:var(--text-dim); font-size:13px;
+  }
+  .order-item .thumb{
+    width:100%; height:100%; min-height:44px; border-radius:6px;
+    background:linear-gradient(135deg,var(--ink-soft-2),var(--ink-soft));
+    border:1px solid var(--line);
+  }
+  .order-item .meta{ display:flex; flex-direction:column; gap:2px; grid-column:2; }
+  .order-item .meta .label{ font-weight:600; font-size:15px; }
+  .order-item .meta .stage{
+    font-family:var(--font-mono); font-size:12px; color:var(--text-dim);
+  }
+  .order-item .play{
+    font-family:var(--font-mono); font-size:12px; color:var(--ink);
+    background:var(--amber); border:none; padding:8px 14px; border-radius:6px;
+    cursor:pointer; font-weight:600; white-space:nowrap;
+  }
+  .order-item .play:hover{ filter:brightness(1.08); }
+  .order-item.locked .play{ background:var(--ink-soft-2); color:var(--text-dim); cursor:not-allowed; }
+  .warn{
+    font-family:var(--font-mono); font-size:12px; color:var(--text-dim);
+    margin-top:24px; padding:14px; border:1px dashed var(--line-2); border-radius:8px;
+  }
+
+  /* ---------- BRACKET ---------- */
+  .bracket-legend{ display:flex; gap:22px; flex-wrap:wrap; margin:26px 0 40px; }
+  .bracket-legend .item{
+    display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-dim);
+  }
+  .swatch{ width:14px; height:4px; border-radius:2px; }
+  .swatch.up{ background:var(--amber); }
+  .swatch.down{ background:var(--magenta); }
+
+  .bracket-path{ margin-bottom:56px; }
+  .bracket-path h3{
+    font-family:var(--font-mono); font-size:13px; letter-spacing:0.1em;
+    text-transform:uppercase; margin-bottom:18px;
+  }
+  .bracket-path.up h3{ color:var(--amber); }
+  .bracket-path.down h3{ color:var(--magenta); }
+
+  .round-row{ display:flex; gap:18px; overflow-x:auto; padding-bottom:8px; }
+  .round-col{ min-width:220px; flex:1; }
+  .round-col .round-name{
+    font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
+    text-transform:uppercase; letter-spacing:0.08em; margin-bottom:10px;
+  }
+  .match{
+    background:var(--ink-soft); border:1px solid var(--line);
+    border-radius:var(--radius); padding:12px; margin-bottom:14px;
+  }
+  .bracket-path.up .match{ border-left:3px solid var(--amber); }
+  .bracket-path.down .match{ border-left:3px solid var(--magenta); }
+  .match-head{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
+    margin-bottom:10px;
+  }
+  .team-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:5px 0; font-size:14px;
+  }
+  .team-row .name{ font-weight:600; letter-spacing:0.01em; }
+  .team-row .name.placeholder{ color:var(--text-dim); font-weight:400; letter-spacing:0.12em; }
+  .team-row .score{ font-family:var(--font-mono); color:var(--text-dim); }
+  .match.score-shown .team-row .score{ color:var(--text); }
+  .advance{
+    margin-top:10px; padding-top:8px; border-top:1px dashed var(--line);
+    font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
+  }
+  .match-actions{ display:flex; gap:6px; margin-top:10px; }
+  .match-actions button{
+    font-family:var(--font-mono); font-size:12px; background:var(--ink-soft-2);
+    border:1px solid var(--line-2); color:var(--text-dim);
+    width:30px; height:26px; border-radius:6px; cursor:pointer;
+  }
+  .match-actions button:hover{ color:var(--text); }
+  .match-actions button.reveal-score{ display:none; }
+  .match.teams-shown .match-actions button.reveal-score{ display:inline-block; }
+  .match.teams-shown .match-actions button.reveal-teams{ display:none; }
+  .match.score-shown .match-actions button.reveal-score{ display:none; }
+
+  .final-note{
+    text-align:center; font-family:var(--font-mono); font-size:12px;
+    color:var(--text-dim); margin-top:8px;
+  }
+
+  /* ---------- TEAMS ---------- */
+  .team-grid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+    gap:16px; margin-top:32px;
+  }
+  .team-card{
+    background:var(--ink-soft); border:1px solid var(--line);
+    border-radius:var(--radius); padding:18px; position:relative; overflow:hidden;
+    transition:transform 0.25s ease, border-color 0.25s ease;
+  }
+  .team-card:hover{ transform:translateY(-4px); border-color:var(--line-2); }
+  .team-card .flag{
+    width:100%; height:64px; border-radius:6px; margin-bottom:14px;
+    background:linear-gradient(135deg,var(--amber),var(--magenta));
+    opacity:0.85; display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-size:26px; color:var(--ink);
+  }
+  .team-card .name{ font-weight:700; font-size:15px; }
+  .team-card .seed{
+    font-family:var(--font-mono); font-size:11px; color:var(--text-dim); margin-top:4px;
+  }
+  .team-card .mmr{
+    font-family:var(--font-mono); font-size:11px; color:var(--mint); margin-top:8px;
+  }
+
+  /* ---------- FORMAT STATS ---------- */
+  .stat-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:1px; background:var(--line); border:1px solid var(--line);
+    border-radius:var(--radius); overflow:hidden; margin-top:32px;
+  }
+  .stat{ background:var(--ink-soft); padding:24px 20px; }
+  .stat .value{ font-family:var(--font-display); font-size:34px; color:var(--amber); }
+  .stat .label{
+    font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
+    text-transform:uppercase; letter-spacing:0.08em; margin-top:4px;
+  }
+
+  /* ---------- PRIZE POOL ---------- */
+  .prize-card{
+    background:var(--ink-soft); border:1px solid var(--line);
+    border-radius:16px; padding:32px; margin-top:32px;
+  }
+  .prize-total{ font-family:var(--font-display); font-size:48px; color:var(--amber); }
+  .split-bar{ display:flex; height:14px; border-radius:999px; overflow:hidden; margin:20px 0 14px; }
+  .split-bar span:nth-child(1){ background:var(--amber); width:50%; }
+  .split-bar span:nth-child(2){ background:var(--mint); width:25%; }
+  .split-bar span:nth-child(3){ background:var(--magenta); width:15%; }
+  .split-bar span:nth-child(4){ background:var(--text-dim); width:10%; }
+  .split-legend{ display:flex; gap:22px; flex-wrap:wrap; font-size:13px; color:var(--text-dim); }
+  .split-legend .who{ font-family:var(--font-mono); color:var(--text-dim); }
+  body.spoilers-on .split-legend .who{ color:var(--text); }
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    border-top:1px solid var(--line); padding:36px 0; text-align:center;
+    font-family:var(--font-mono); font-size:12px; color:var(--text-dim);
+  }
+  footer a{ color:var(--text-dim); }
+  footer a:hover{ color:var(--mint); }
+
+  @media (max-width:640px){
+    section{ padding:64px 0; }
+    .order-item{ grid-template-columns:36px 1fr; }
+    .order-item .play{ grid-column:2; justify-self:start; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-row">
+    <div class="brand"><span class="dot">◆</span> REPLAY BLOCK</div>
+    <nav class="nav-links">
+      <a href="#watch-order">Watch Order</a>
+      <a href="#bracket">Bracket</a>
+      <a href="#teams">Teams</a>
+      <a href="#format">Format</a>
+    </nav>
+    <button class="spoiler-toggle" id="spoilerToggle" aria-pressed="false">
+      SPOILERS
+      <span class="reel"><span class="reel-track"><span>OFF</span><span>ON</span></span></span>
+    </button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-media"><span>[ hero banner / loop placeholder — swap in your own art or video ]</span></div>
+    <p class="eyebrow">Placeholder Invitational · Season 1</p>
+    <h1>REPLAY<br>BLOCK</h1>
+    <p class="sub">EIGHT TEAMS ★ SPOILER-SAFE VOD ORDER</p>
+    <div class="shield-badge"><span class="pulse"></span> BLACKOUT MODE — ENGAGED</div>
+    <p class="hero-note">Nothing below is revealed until you ask for it. Matchups and scores stay
+      hidden match-by-match, or flip the switch above to open the whole bracket at once.</p>
+  </div>
+</section>
+
+<section id="watch-order">
+  <div class="wrap">
+    <p class="eyebrow">Step one</p>
+    <h2>Watch Order</h2>
+    <p style="max-width:520px;margin-top:10px;">Play these top to bottom. Each one only unlocks
+      once you've reached it in the list — that's the entire spoiler-safety system.</p>
+    <ul class="order-list">
+      <li class="order-item"><span class="idx">01</span>
+        <div class="meta"><span class="label">Group Match — Round 1, Game 1</span><span class="stage">Best of 1</span></div>
+        <div class="thumb" style="display:none"></div>
+        <button class="play">▶ WATCH</button>
+      </li>
+      <li class="order-item"><span class="idx">02</span>
+        <div class="meta"><span class="label">Group Match — Round 1, Game 2</span><span class="stage">Best of 1</span></div>
+        <button class="play">▶ WATCH</button>
+      </li>
+      <li class="order-item"><span class="idx">03</span>
+        <div class="meta"><span class="label">Upper Bracket Final</span><span class="stage">Best of 3</span></div>
+        <button class="play">▶ WATCH</button>
+      </li>
+      <li class="order-item locked"><span class="idx">04</span>
+        <div class="meta"><span class="label">Grand Final</span><span class="stage">Best of 3 · locked until you catch up</span></div>
+        <button class="play" disabled>▶ WATCH</button>
+      </li>
+    </ul>
+    <p class="warn">⚠ Video titles on the host channel will name both teams. Only open a
+      match once you've actually reached it in the order above.</p>
+  </div>
+</section>
+
+<section id="bracket">
+  <div class="wrap">
+    <p class="eyebrow">Step two</p>
+    <h2>Bracket</h2>
+    <p style="max-width:560px;margin-top:10px;">Double elimination, frozen at its day-one shape.
+      Click the eye on any match to reveal who played — the score stays hidden until you ask
+      for that too.</p>
+
+    <div class="bracket-legend">
+      <div class="item"><span class="swatch up"></span> Upper bracket — winners path</div>
+      <div class="item"><span class="swatch down"></span> Lower bracket — one loss and you're out</div>
+    </div>
+
+    <div class="bracket-path up">
+      <h3>⬆ Upper Bracket</h3>
+      <div class="round-row" id="upperRounds"></div>
+    </div>
+
+    <div class="bracket-path down">
+      <h3>⬇ Lower Bracket</h3>
+      <div class="round-row" id="lowerRounds"></div>
+    </div>
+
+    <div class="bracket-path" style="max-width:260px;margin:0 auto;">
+      <div class="round-row" id="grandFinalRound"></div>
+      <p class="final-note">🏆 Champion emerges here</p>
+    </div>
+  </div>
+</section>
+
+<section id="teams">
+  <div class="wrap">
+    <p class="eyebrow">The field</p>
+    <h2>Eight Teams</h2>
+    <p style="max-width:520px;margin-top:10px;">Rosters as locked before day one. Seeds reflect
+      pre-event ratings, not results.</p>
+    <div class="team-grid">
+      <div class="team-card"><div class="flag">A</div><div class="name">Team Aurora</div><div class="seed">SEED 1</div><div class="mmr">RATING 6120</div></div>
+      <div class="team-card"><div class="flag">B</div><div class="name">Team Basalt</div><div class="seed">SEED 2</div><div class="mmr">RATING 6045</div></div>
+      <div class="team-card"><div class="flag">C</div><div class="name">Team Cobalt</div><div class="seed">SEED 3</div><div class="mmr">RATING 5980</div></div>
+      <div class="team-card"><div class="flag">D</div><div class="name">Team Delta</div><div class="seed">SEED 4</div><div class="mmr">RATING 5910</div></div>
+      <div class="team-card"><div class="flag">E</div><div class="name">Team Ember</div><div class="seed">SEED 5</div><div class="mmr">RATING 5840</div></div>
+      <div class="team-card"><div class="flag">F</div><div class="name">Team Fathom</div><div class="seed">SEED 6</div><div class="mmr">RATING 5790</div></div>
+      <div class="team-card"><div class="flag">G</div><div class="name">Team Griffon</div><div class="seed">SEED 7</div><div class="mmr">RATING 5705</div></div>
+      <div class="team-card"><div class="flag">H</div><div class="name">Team Halyard</div><div class="seed">SEED 8</div><div class="mmr">RATING 5630</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="format">
+  <div class="wrap">
+    <p class="eyebrow">The rules</p>
+    <h2>Format</h2>
+    <p style="max-width:600px;margin-top:10px;">Eight teams, double elimination, played over a
+      single weekend. Day one seeds the bracket with best-of-ones; day two runs best-of-threes
+      the rest of the way.</p>
+    <div class="stat-grid">
+      <div class="stat"><div class="value">8</div><div class="label">Teams</div></div>
+      <div class="stat"><div class="value">2X</div><div class="label">Elimination</div></div>
+      <div class="stat"><div class="value">2</div><div class="label">Days</div></div>
+      <div class="stat"><div class="value">13</div><div class="label">Matches</div></div>
+      <div class="stat"><div class="value">EU</div><div class="label">Server region</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="prizes">
+  <div class="wrap">
+    <p class="eyebrow">Community-funded</p>
+    <h2>Prize Pool</h2>
+    <div class="prize-card">
+      <div class="prize-total">$0,000</div>
+      <p style="margin-top:4px;">Split between the top four finishers. Who took which cut stays
+        behind the spoiler switch.</p>
+      <div class="split-bar"><span></span><span></span><span></span><span></span></div>
+      <div class="split-legend">
+        <span>50% — <span class="who">1st: ??? </span></span>
+        <span>25% — <span class="who">2nd: ??? </span></span>
+        <span>15% — <span class="who">3rd: ??? </span></span>
+        <span>10% — <span class="who">4th: ??? </span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    REPLAY BLOCK · Placeholder Invitational ·
+    <a href="#">Main page</a> ·
+    <a href="#">Channel</a> ·
+    Template structure only — swap in your own event details
+  </div>
+</footer>
+
+<script>
+(function(){
+  // ---- Bracket data model -------------------------------------------
+  // Replace teamA/teamB/scoreA/scoreB with your real results. Everything
+  // else (ids, rounds, advance labels) just describes bracket shape.
+  const upperRounds = [
+    { name:'Round 1', matches:[
+      { id:'UR1-1', fmt:'BO1', teamA:'Team A', teamB:'Team B', scoreA:2, scoreB:0, advance:'→ Round 2 · M1' },
+      { id:'UR1-2', fmt:'BO1', teamA:'Team C', teamB:'Team D', scoreA:2, scoreB:1, advance:'→ Round 2 · M1' },
+      { id:'UR1-3', fmt:'BO1', teamA:'Team E', teamB:'Team F', scoreA:2, scoreB:0, advance:'→ Round 2 · M2' },
+      { id:'UR1-4', fmt:'BO1', teamA:'Team G', teamB:'Team H', scoreA:2, scoreB:1, advance:'→ Round 2 · M2' },
+    ]},
+    { name:'Round 2', matches:[
+      { id:'UR2-1', fmt:'BO1', teamA:'Winner UR1-1', teamB:'Winner UR1-2', scoreA:2, scoreB:1, advance:'→ Upper Final' },
+      { id:'UR2-2', fmt:'BO1', teamA:'Winner UR1-3', teamB:'Winner UR1-4', scoreA:1, scoreB:2, advance:'→ Upper Final' },
+    ]},
+    { name:'Upper Final', matches:[
+      { id:'UF', fmt:'BO3', teamA:'Winner UR2-1', teamB:'Winner UR2-2', scoreA:2, scoreB:0, advance:'→ Grand Final' },
+    ]},
+  ];
+
+  const lowerRounds = [
+    { name:'Elim Round', matches:[
+      { id:'LR0-1', fmt:'BO1', teamA:'Loser UR1-1', teamB:'Loser UR1-2', scoreA:2, scoreB:1, advance:'→ LB Round 1' },
+      { id:'LR0-2', fmt:'BO1', teamA:'Loser UR1-3', teamB:'Loser UR1-4', scoreA:0, scoreB:2, advance:'→ LB Round 1' },
+    ]},
+    { name:'LB Round 1', matches:[
+      { id:'LR1-1', fmt:'BO1', teamA:'Loser UR2-2', teamB:'Winner LR0-1', scoreA:2, scoreB:0, advance:'→ LB Semifinal' },
+      { id:'LR1-2', fmt:'BO1', teamA:'Loser UR2-1', teamB:'Winner LR0-2', scoreA:1, scoreB:2, advance:'→ LB Semifinal' },
+    ]},
+    { name:'LB Semifinal', matches:[
+      { id:'LSF', fmt:'BO3', teamA:'Winner LR1-1', teamB:'Winner LR1-2', scoreA:2, scoreB:1, advance:'→ LB Final' },
+    ]},
+    { name:'LB Final', matches:[
+      { id:'LF', fmt:'BO3', teamA:'Loser UF', teamB:'Winner LSF', scoreA:1, scoreB:2, advance:'→ Grand Final' },
+    ]},
+  ];
+
+  const grandFinal = [
+    { name:'Grand Final', matches:[
+      { id:'GF', fmt:'BO3', teamA:'Winner UF', teamB:'Winner LF', scoreA:3, scoreB:1, advance:'🏆 Champion crowned' },
+    ]},
+  ];
+
+  function matchHTML(m){
+    return `
+      <div class="match" data-id="${m.id}">
+        <div class="match-head"><span>${m.id}</span><span>${m.fmt}</span></div>
+        <div class="team-row">
+          <span class="name placeholder" data-real="${m.teamA}">·········</span>
+          <span class="score" data-real="${m.scoreA}">—</span>
+        </div>
+        <div class="team-row">
+          <span class="name placeholder" data-real="${m.teamB}">·········</span>
+          <span class="score" data-real="${m.scoreB}">—</span>
+        </div>
+        <div class="advance">${m.advance}</div>
+        <div class="match-actions">
+          <button class="reveal-teams" title="Reveal matchup">👁</button>
+          <button class="reveal-score" title="Reveal score">?</button>
+        </div>
+      </div>`;
+  }
+
+  function renderRounds(container, rounds){
+    container.innerHTML = rounds.map(r => `
+      <div class="round-col">
+        <div class="round-name">${r.name}</div>
+        ${r.matches.map(matchHTML).join('')}
+      </div>
+    `).join('');
+  }
+
+  renderRounds(document.getElementById('upperRounds'), upperRounds);
+  renderRounds(document.getElementById('lowerRounds'), lowerRounds);
+  renderRounds(document.getElementById('grandFinalRound'), grandFinal);
+
+  // ---- Reveal mechanics ------------------------------------------------
+  function revealTeams(matchEl){
+    matchEl.querySelectorAll('.name').forEach(el=>{
+      el.textContent = el.dataset.real;
+      el.classList.remove('placeholder');
+    });
+    matchEl.classList.add('teams-shown');
+  }
+  function revealScore(matchEl){
+    matchEl.querySelectorAll('.score').forEach(el=>{
+      el.textContent = el.dataset.real;
+    });
+    matchEl.classList.add('score-shown');
+  }
+
+  document.addEventListener('click', (e)=>{
+    const revealBtn = e.target.closest('.reveal-teams');
+    const scoreBtn = e.target.closest('.reveal-score');
+    if(revealBtn) revealTeams(revealBtn.closest('.match'));
+    if(scoreBtn) revealScore(scoreBtn.closest('.match'));
+  });
+
+  const toggle = document.getElementById('spoilerToggle');
+  toggle.addEventListener('click', ()=>{
+    const on = document.body.classList.toggle('spoilers-on');
+    toggle.setAttribute('aria-pressed', on);
+    if(on){
+      document.querySelectorAll('.match').forEach(m=>{ revealTeams(m); revealScore(m); });
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
