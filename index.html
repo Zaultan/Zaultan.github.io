@@ -72,6 +72,15 @@ Add team logos
   h2{ font-size:clamp(28px,4vw,42px); }
   p{ color:var(--text-dim); }
 
+  .container {
+    display: flex;       /* Places child elements side by side */
+    gap: 20px;           /* Adds space between columns */
+  }
+
+  .column {
+    flex: 1;             /* Forces both columns to take up equal width */
+  }
+
   /* ---------- NAV ---------- */
   header.nav{
     position:sticky; top:0; z-index:50;
