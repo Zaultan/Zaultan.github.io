@@ -8,6 +8,8 @@
 
 <!--
 Add a button beside the watch button with a green tick which removes the match from the watch order after being pressed.
+Add a legend to the prize pool
+Add team logos
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,7 +26,7 @@ Add a button beside the watch button with a green tick which removes the match f
     --text:       #f2eefb;
     --text-dim:   #9f93bf;
     --amber:      #f5b400;   /* upper bracket / winners path */
-    --magenta:    #ff3d81;   /* lower bracket / elimination path */
+    --magenta:    #f83abf;   /* lower bracket / elimination path */
     --mint:       #63e6be;   /* links, focus, interactive accents */
     --font-display: 'Bebas Neue', sans-serif;
     --font-body:    'Inter', system-ui, sans-serif;
@@ -406,6 +408,18 @@ Add a button beside the watch button with a green tick which removes the match f
 </head>
 <body>
 
+<section class="header">
+  <div class="wrap">
+    <div class="header-media"><span><img src="https://raw.githubusercontent.com/Zaultan/Zaultan.github.io/refs/heads/main/Assets/Banner_1.png" alt="Description of image"></span></div>
+    <p class="eyebrow">The International 2025 - Test website for 2026 TI</p>
+    <h1>SPOILER BLOCK</h1>
+    <p class="sub"> SPOILER-SAFE VODs FOR THE INTERNATIONALs</p>
+    <div class="shield-badge"><span class="pulse"></span> BLACKOUT MODE — ENGAGED</div>
+    <p class="header-note">Nothing below is revealed until you ask for it. Matchups and scores stay
+      hidden match-by-match, or flip the switch above to open the whole bracket at once.</p>
+  </div>
+</section>
+
 <header class="nav">
   <div class="nav-row">
     <div class="brand"><span class="dot">◆</span> REPLAY BLOCK</div>
@@ -421,26 +435,14 @@ Add a button beside the watch button with a green tick which removes the match f
   </div>
 </header>
 
-<section class="header">
-  <div class="wrap">
-    <div class="header-media"><span>[ <img src="https://raw.githubusercontent.com/Zaultan/Zaultan.github.io/refs/heads/main/Assets/Banner_1.png" alt="Description of image"> ]</span></div>
-    <p class="eyebrow">Placeholder Invitational · Season 1</p>
-    <h1>REPLAY BLOCK</h1>
-    <p class="sub"> SPOILER-SAFE VODs FOR THE INTERNATIONALR</p>
-    <div class="shield-badge"><span class="pulse"></span> BLACKOUT MODE — ENGAGED</div>
-    <p class="header-note">Nothing below is revealed until you ask for it. Matchups and scores stay
-      hidden match-by-match, or flip the switch above to open the whole bracket at once.</p>
-  </div>
-</section>
-
 
 <section id="bracket">
   <div class="wrap">
-    <p class="eyebrow">Step two</p>
+    <p class="eyebrow">Step One</p>
     <h2>Bracket</h2>
-    <p style="max-width:560px;margin-top:10px;">Double elimination, frozen at its day-one shape.
-      Click the eye on any match to reveal who played — the score stays hidden until you ask
-      for that too, and the game buttons only go live once the matchup is revealed.</p>
+    <p style="max-width:560px;margin-top:10px;">Double elimination, with the 8 starting matches displayed.
+      Click the eye on any match to reveal which teams are playing — the score stays hidden until you click the ?.
+      All games matches show 3 games to prevent spoilers.</p>
 
     <div class="bracket-legend">
       <div class="item"><span class="swatch up"></span> Upper bracket — winners path</div>
@@ -474,7 +476,7 @@ Add a button beside the watch button with a green tick which removes the match f
 
 <section id="watch-order">
   <div class="wrap">
-    <p class="eyebrow">Step one</p>
+    <p class="eyebrow">Step Two</p>
     <h2>Watch Order</h2>
     <p style="max-width:560px;margin-top:10px;">Every game from the tournament, in play order.
       Rows stay locked until you reveal that match in the bracket below — reveal a match once,
@@ -525,10 +527,10 @@ Add a button beside the watch button with a green tick which removes the match f
 
 <footer>
   <div class="wrap">
-    REPLAY BLOCK · Placeholder Invitational ·
-    <a href="#">Main page</a> ·
-    <a href="#">Channel</a> ·
-    Template structure only — swap in your own event details
+    SPOILER BLOCK · a small project by Zault ·
+    <a href="#">Back to the top</a> ·
+    <a href="#">href</a> ·
+    This is a blank space semper fi lorem ipsum sigma alpha
   </div>
 </footer>
 
