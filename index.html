@@ -16,9 +16,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* Design tokens — change a value here and it updates everywhere it's used.
-     Keeping color/font/radius choices in one place is what makes the rest
-     of this stylesheet safe to skim instead of hunting for hex codes. */
+  /* Design tokens — change a value here and it updates everywhere it's used. */
   :root{
     --ink:        #0c0a17;   /* page background */
     --ink-soft:   #161228;   /* card/panel background, one step lighter than the page */
@@ -74,8 +72,8 @@
   h2{ font-size:clamp(28px,4vw,42px); }
   p{ color:var(--text-dim); }
 
-  /* Generic two-column flex helper — used by the hero/header section to sit
-     the title next to the blackout-mode note. Kept generic (not prefixed
+  /* Generic two-column flex helper — used by the banner section to make
+     the title sit next to the blackout-mode note. Kept generic (not prefixed
      "header-") in case it's reused elsewhere later. */
   .container {
     display: flex;       /* Places child elements side by side */
@@ -83,7 +81,7 @@
   }
 
   .column {
-    flex: 1;             /* Forces both columns to take up equal width */
+    flex: 1;             /* 1 Forces both columns to take up equal width, I think 0 doesnt? */
   }
 
   /* ---------- NAV ---------- */
@@ -110,9 +108,9 @@
   .nav-links a:hover{ color:var(--text); text-decoration:none; }
 
   /* Spoiler toggle — signature element, styled like a mechanical tally.
-     .reel is a small window; .reel-track holds "OFF" stacked above "ON" and
-     slides up by 50% of its own height to swap which word shows, like a
-     flip-clock digit. The JS just toggles body.spoilers-on. */
+     .reel is a small window 
+     .reel-track holds "OFF" stacked above "ON" and slides up by 50% of its own height to swap which word show 
+     The JS just toggles body.spoilers-on. */
   .spoiler-toggle{
     display:flex; align-items:center; gap:10px;
     background:var(--ink-soft); border:1px solid var(--line-2);
@@ -129,7 +127,7 @@
     transform:translateY(0%);
   }
   .spoiler-toggle .reel-track span{
-    height:22px; display:flex; align-items:center; justify-content:center;
+    height:32px; display:flex; align-items:center; justify-content:center;
     font-weight:600; letter-spacing:0.05em;
   }
   .spoiler-toggle .reel-track span:first-child{ color:var(--text-dim); }
