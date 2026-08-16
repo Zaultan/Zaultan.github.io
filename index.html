@@ -7,10 +7,8 @@
 <meta name="description" content="A spoiler-safe VOD hub template: frozen bracket, staged reveals, watch order. Swap in your own tournament.">
 
 <!--
-Add a button beside the watch button with a green tick which removes the match from the watch order after being pressed.
-Add a legend to the prize pool
-Add team logos
-Move Upper Bracket Round 1 and Round 2 to the left
+  Still open:
+  - Add real team logos to the Teams section (currently a letter-on-gradient placeholder)
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,21 +16,24 @@ Move Upper Bracket Round 1 and Round 2 to the left
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
+  /* Design tokens — change a value here and it updates everywhere it's used.
+     Keeping color/font/radius choices in one place is what makes the rest
+     of this stylesheet safe to skim instead of hunting for hex codes. */
   :root{
-    --ink:        #0c0a17;
-    --ink-soft:   #161228;
-    --ink-soft-2: #1f1a38;
-    --line:       rgba(242,238,251,0.10);
-    --line-2:     rgba(242,238,251,0.18);
-    --text:       #f2eefb;
-    --text-dim:   #9f93bf;
+    --ink:        #0c0a17;   /* page background */
+    --ink-soft:   #161228;   /* card/panel background, one step lighter than the page */
+    --ink-soft-2: #1f1a38;   /* a further step lighter — used for disabled/locked buttons */
+    --line:       rgba(242,238,251,0.10);  /* faint hairline borders/dividers */
+    --line-2:     rgba(242,238,251,0.18);  /* slightly stronger border, used on hover/focus */
+    --text:       #f2eefb;   /* primary text color */
+    --text-dim:   #9f93bf;   /* secondary/muted text (labels, timestamps, disabled state) */
     --amber:      #f5b400;   /* upper bracket / winners path */
     --magenta:    #f83abf;   /* lower bracket / elimination path */
-    --mint:       #63e6be;   /* links, focus, interactive accents */
-    --font-display: 'Bebas Neue', sans-serif;
-    --font-body:    'Inter', system-ui, sans-serif;
-    --font-mono:    'IBM Plex Mono', monospace;
-    --radius: 10px;
+    --mint:       #63e6be;   /* links, focus rings, interactive accents */
+    --font-display: 'Bebas Neue', sans-serif;   /* big condensed headings */
+    --font-body:    'Inter', system-ui, sans-serif;  /* everyday paragraph text */
+    --font-mono:    'IBM Plex Mono', monospace;      /* labels, stats, anything "data-ish" */
+    --radius: 10px;          /* default corner rounding for cards/buttons */
   }
 
   *{ box-sizing:border-box; }
@@ -73,6 +74,9 @@ Move Upper Bracket Round 1 and Round 2 to the left
   h2{ font-size:clamp(28px,4vw,42px); }
   p{ color:var(--text-dim); }
 
+  /* Generic two-column flex helper — used by the hero/header section to sit
+     the title next to the blackout-mode note. Kept generic (not prefixed
+     "header-") in case it's reused elsewhere later. */
   .container {
     display: flex;       /* Places child elements side by side */
     gap: 20px;           /* Adds space between columns */
@@ -105,7 +109,10 @@ Move Upper Bracket Round 1 and Round 2 to the left
   }
   .nav-links a:hover{ color:var(--text); text-decoration:none; }
 
-  /* Spoiler toggle — signature element, styled like a mechanical tally */
+  /* Spoiler toggle — signature element, styled like a mechanical tally.
+     .reel is a small window; .reel-track holds "OFF" stacked above "ON" and
+     slides up by 50% of its own height to swap which word shows, like a
+     flip-clock digit. The JS just toggles body.spoilers-on. */
   .spoiler-toggle{
     display:flex; align-items:center; gap:10px;
     background:var(--ink-soft); border:1px solid var(--line-2);
@@ -179,7 +186,6 @@ Move Upper Bracket Round 1 and Round 2 to the left
   .swatch{ width:14px; height:4px; border-radius:2px; }
   .swatch.up{ background:var(--amber); }
   .swatch.down{ background:var(--magenta); }
-  .swatch.drop{ background:repeating-linear-gradient(90deg, var(--magenta) 0 4px, transparent 4px 8px); }
 
   .bracket-canvas{
     position:relative; overflow-x:auto; padding:8px 4px 16px;
@@ -187,12 +193,13 @@ Move Upper Bracket Round 1 and Round 2 to the left
   }
   /* Lines render behind the cards so they never cover match content. */
   .bracket-lines{ position:absolute; top:0; left:0; pointer-events:none; z-index:0; }
-  .bracket-outer{ position:relative; z-index:1; }
 
-  /* Symmetric layout: 4 equal round tracks + a centred grand-final column.
-     Upper and lower brackets share the same tracks so finals line up. */
+  /* Two-column layout: left column stacks the upper + lower brackets on
+     top of each other, right column is a fixed-width slot for the Grand
+     Final card, vertically centered against that stack (align-items:center)
+     so it visually sits "between" the two brackets feeding into it. */
   .bracket-outer{
-    position:relative; display:grid;
+    position:relative; z-index:1; display:grid;
     grid-template-columns:minmax(0,1fr) 226px;
     align-items:center; gap:0 34px; min-width:max-content;
   }
@@ -212,6 +219,10 @@ Move Upper Bracket Round 1 and Round 2 to the left
   .bracket-path.down h3{ color:var(--magenta); }
   .bracket-path.gf h3{ color:var(--amber); }
 
+  /* Each round is a fixed-width grid track so Upper R1 lines up with Lower
+     R1, Upper R2 with Lower R2, etc. justify-content:start left-aligns the
+     tracks (Upper Bracket only has 3 rounds vs Lower's 4, so without this
+     they'd anchor to opposite ends and drift out of alignment). */
   .round-row{
     display:grid; grid-template-columns:repeat(4, 196px);
     justify-content:start; gap:0 26px;
@@ -220,6 +231,10 @@ Move Upper Bracket Round 1 and Round 2 to the left
   .bracket-path.gf .round-row{ grid-template-columns:226px; justify-content:center; }
 
   /* header pinned to the top of every track, cards centred inside it */
+  /* justify-content:space-evenly is what makes a round with fewer matches
+     (e.g. a single Upper Final card) appear vertically centered between
+     the two Round-2 matches that feed it — the classic "converging"
+     bracket look, achieved without any manual offset math. */
   .round-col{
     position:relative; padding-top:38px;
     display:flex; flex-direction:column; justify-content:space-evenly;
@@ -247,7 +262,9 @@ Move Upper Bracket Round 1 and Round 2 to the left
     border-color:var(--line-2); transform:translateY(-2px);
     box-shadow:0 16px 30px -20px rgba(0,0,0,1);
   }
-  /* accent as a symmetric top rail rather than a left edge */
+  /* accent as a symmetric top rail rather than a left edge —
+     a thin gradient bar (faded at both ends) laid over the card's top
+     edge via ::before, colored per bracket path. */
   .match::before{
     content:''; position:absolute; top:0; left:0; right:0; height:3px;
   }
@@ -292,6 +309,12 @@ Move Upper Bracket Round 1 and Round 2 to the left
     display:grid; grid-auto-flow:column; grid-auto-columns:1fr;
     gap:6px; margin-top:12px;
   }
+  /* A game button is always one of three states (set in JS, see
+     matchCardHTML): .active = real link, ready to click; .locked = the
+     matchup hasn't been revealed yet, so the link is withheld; .unplayed =
+     the series ended before this game was needed (e.g. a 2-0 sweep has no
+     Game 3), shown struck-through so it reads as "never happened" rather
+     than "hidden". */
   .game-btn{
     font-family:var(--font-mono); font-size:11px; padding:6px 0; border-radius:6px;
     border:1px solid var(--line-2); text-decoration:none; line-height:1;
@@ -329,6 +352,12 @@ Move Upper Bracket Round 1 and Round 2 to the left
 
 
   /* ---------- WATCH ORDER ---------- */
+  /* One <li> per game. Rows come in two flavors, toggled by JS adding/
+     removing the .locked class: a locked row has no real link and a
+     disabled button; once revealed it gets a real "▶ WATCH" link plus the
+     green "mark watched" button. Marking a game watched doesn't just style
+     it — renderWatchOrder() drops it from the list entirely (see the
+     watchedKeys Set in the script). */
   .order-list{ list-style:none; margin:32px 0 0; padding:0; }
   .order-item{
     display:grid; grid-template-columns:56px 1fr auto; gap:18px; align-items:center;
@@ -352,6 +381,9 @@ Move Upper Bracket Round 1 and Round 2 to the left
   .order-item.locked .play{ background:var(--ink-soft-2); color:var(--text-dim); cursor:not-allowed; }
   .order-item.locked .meta .label{ color:var(--text-dim); font-weight:500; }
   .order-item .row-actions{ display:flex; gap:8px; align-items:center; }
+  /* Green "I watched this" button — deliberately a different hue from
+     everything else on the page (amber/magenta/mint) so it reads as a
+     distinct, safe, positive action rather than another bracket accent. */
   .order-item .watched-btn{
     font-family:var(--font-mono); font-size:13px; font-weight:700;
     color:#0d1b12; background:#2ecc71; border:none; border-radius:6px;
@@ -364,7 +396,6 @@ Move Upper Bracket Round 1 and Round 2 to the left
     margin-top:24px; padding:14px; border:1px dashed var(--line-2); border-radius:8px;
   }
 
-  
   /* ---------- TEAMS ---------- */
   .team-grid{
     display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
@@ -405,6 +436,19 @@ Move Upper Bracket Round 1 and Round 2 to the left
   .split-legend{ display:flex; gap:22px; flex-wrap:wrap; font-size:13px; color:var(--text-dim); }
   .split-legend .who{ font-family:var(--font-mono); color:var(--text-dim); }
   body.spoilers-on .split-legend .who{ color:var(--text); }
+  /* One dot per legend entry, colored to match the same-position segment
+     in .split-bar above. c1 and c5 are both amber on purpose — the bar
+     itself reuses amber for the 1st-place and 5th-16th segments, so the
+     legend mirrors that rather than inventing a color the bar doesn't have. */
+  .split-legend .dot{
+    display:inline-block; width:10px; height:10px; border-radius:50%;
+    margin-right:6px; vertical-align:middle;
+  }
+  .split-legend .dot.c1{ background:var(--amber); }
+  .split-legend .dot.c2{ background:var(--mint); }
+  .split-legend .dot.c3{ background:var(--magenta); }
+  .split-legend .dot.c4{ background:var(--text-dim); }
+  .split-legend .dot.c5{ background:var(--amber); }
 
   /* ---------- FOOTER ---------- */
   footer{
@@ -450,9 +494,10 @@ Move Upper Bracket Round 1 and Round 2 to the left
   <div class="nav-row">
     <div class="brand"><span class="dot">◆</span> REPLAY BLOCK</div>
     <nav class="nav-links">
-      <a href="#watch-order">Watch Order</a>
       <a href="#bracket">Bracket</a>
+      <a href="#watch-order">Watch Order</a>
       <a href="#teams">Teams</a>
+      <a href="#prizes">Prize Pool</a>
     </nav>
     <button class="spoiler-toggle" id="spoilerToggle" aria-pressed="false">
       SPOILERS
@@ -471,7 +516,6 @@ Move Upper Bracket Round 1 and Round 2 to the left
     <div class="bracket-legend">
       <div class="item"><span class="swatch up"></span> Upper bracket — winners path</div>
       <div class="item"><span class="swatch down"></span> Lower bracket — one loss and you're out</div>
-      <div class="item"><span class="swatch drop"></span> Where a losing team drops to</div>
     </div>
 
     <div class="bracket-canvas" id="bracketCanvas">
@@ -539,11 +583,11 @@ Move Upper Bracket Round 1 and Round 2 to the left
       <p style="margin-top:4px;">Tournament Split of prize pools and their percentages</p>
       <div class="split-bar"><span></span><span></span><span></span><span></span><span></span></div>
       <div class="split-legend">
-        <span>42.5% — <span class="who">1st $1,224,732 </span></span>
-        <span>13% — <span class="who">2nd: $374,676 </span></span>
-        <span>9% — <span class="who">3rd: $259,319	 </span></span>
-        <span>6% — <span class="who">4th: $172,918	 </span></span>
-        <span>1% — <span class="who">5-16th: $172,918	 </span></span>
+        <span><span class="dot c1"></span>42.5% — <span class="who">1st $1,224,732 </span></span>
+        <span><span class="dot c2"></span>13% — <span class="who">2nd: $374,676 </span></span>
+        <span><span class="dot c3"></span>9% — <span class="who">3rd: $259,319	 </span></span>
+        <span><span class="dot c4"></span>6% — <span class="who">4th: $172,918	 </span></span>
+        <span><span class="dot c5"></span>1% — <span class="who">5-16th: $172,918	 </span></span>
       </div>
     </div>
   </div>
@@ -560,6 +604,24 @@ Move Upper Bracket Round 1 and Round 2 to the left
 
 <script>
 (function(){
+  // =====================================================================
+  // HOW THIS PAGE WORKS
+  // 1. `matches` below is the single source of truth — every match, its
+  //    teams, scores and VOD links, plus how it connects to the rest of
+  //    the bracket (`next` / `dropsTo`).
+  // 2. Three Sets track what the visitor has revealed/watched so far:
+  //    teamsRevealed, scoresRevealed, watchedKeys. Nothing else holds
+  //    state — nothing is saved between page loads.
+  // 3. Every time one of those Sets changes (a click), we don't patch the
+  //    DOM in place — we just re-run the render functions, which rebuild
+  //    the relevant HTML from `matches` + the current Sets. Simpler to
+  //    reason about than tracking incremental DOM updates, and cheap
+  //    enough for ~14 matches that performance is a non-issue.
+  // 4. drawLines() runs after every render (via requestAnimationFrame, so
+  //    it waits for the new layout to settle) and draws the SVG curves
+  //    connecting each match to whatever it feeds into.
+  // =====================================================================
+
   // ---- Bracket + VOD data ------------------------------------------------
   // `next`     = id of the match the WINNER advances to
   // `dropsTo`  = id of the match the LOSER drops to (upper bracket only)
@@ -633,6 +695,9 @@ Move Upper Bracket Round 1 and Round 2 to the left
 
   const matchesById = Object.fromEntries(matches.map(m => [m.id, m]));
 
+  // Which matches appear in which bracket column, top to bottom, left to
+  // right. Purely presentational — doesn't affect who-plays-who logic,
+  // that's entirely driven by each match's own `next`/`dropsTo` fields.
   const upperGroups = [
     { name:'Round 1',     ids:['UR1-1','UR1-2','UR1-3','UR1-4'] },
     { name:'Round 2',     ids:['UR2-1','UR2-2'] },
@@ -646,6 +711,9 @@ Move Upper Bracket Round 1 and Round 2 to the left
   ];
   const gfGroups = [{ name:'Grand Final', ids:['GF'] }];
 
+  // Human-readable short names for match ids, used in "→ advances to" text
+  // and in the Watch Order stage label. UR1-x isn't listed because those
+  // matches never appear as someone else's `next`/`dropsTo` target.
   const SHORT_LABEL = {
     'UR2-1':'Upper R2 · M1', 'UR2-2':'Upper R2 · M2', 'UF':'Upper Final',
     'LR1-1':'Lower R1 · M1', 'LR1-2':'Lower R1 · M2',
@@ -654,33 +722,53 @@ Move Upper Bracket Round 1 and Round 2 to the left
   };
   const PATH_LABEL = { up:'Upper Bracket', down:'Lower Bracket', gf:'Grand Final' };
 
+  // ---- Reveal state ---------------------------------------------------
+  // Every match starts hidden except Round 1 (nothing to spoil before it).
+  // Reset target for the spoiler toggle's "off" position, too.
   const INITIAL_IDS = ['UR1-1','UR1-2','UR1-3','UR1-4'];
-  let teamsRevealed = new Set(INITIAL_IDS);
-  let scoresRevealed = new Set(INITIAL_IDS);
+  let teamsRevealed = new Set(INITIAL_IDS);   // matchup (team names) shown
+  let scoresRevealed = new Set(INITIAL_IDS);  // final score shown
   let watchedKeys = new Set(); // "matchId-gameIndex" the person has ticked off
 
   // ---- Rendering -----------------------------------------------------
+  // Builds one bracket match card as an HTML string. Called fresh every
+  // render (see renderAll), so it always reflects the current reveal state
+  // for `m.id` rather than being toggled in place.
   function matchCardHTML(m){
     const shown = teamsRevealed.has(m.id);
     const scored = scoresRevealed.has(m.id);
+
+    // Always show at least 3 game-button slots (Bo3 is the common case),
+    // but stretch to however many games actually exist (Grand Final is
+    // Bo5). This is also *why* an unplayed slot still gets a button
+    // instead of being omitted — hiding it would tell you the series was
+    // a sweep before you'd revealed anything, which is itself a spoiler.
     const slots = Math.max(3, m.games.length);
     let gamesHTML = '';
     for(let i = 0; i < slots; i++){
       const url = m.games[i];
       if(!url){
+        // No URL at this index = that game was never played.
         gamesHTML += `<span class="game-btn unplayed" aria-disabled="true" title="Not played">G${i+1}</span>`;
       } else if(shown){
+        // Matchup revealed → real, clickable link.
         gamesHTML += `<a class="game-btn active" href="${url}" target="_blank" rel="noopener">G${i+1}</a>`;
       } else {
+        // A game exists but we're still withholding the link.
         gamesHTML += `<span class="game-btn locked" aria-disabled="true" title="Reveal the matchup to unlock">G${i+1}</span>`;
       }
     }
 
+    // "Advances to" / "loser drops to" footer text, built from this
+    // match's own next/dropsTo ids rather than hardcoded per match.
     let advanceHTML = '';
     if(m.next) advanceHTML += `<div class="advance">→ ${SHORT_LABEL[m.next] || m.next}</div>`;
     else advanceHTML += `<div class="advance">🏆 Champion crowned</div>`;
     if(m.dropsTo) advanceHTML += `<div class="advance drop">↴ loser to ${SHORT_LABEL[m.dropsTo] || m.dropsTo}</div>`;
 
+    // data-id/data-next/data-drops-to on the wrapper aren't used for
+    // styling — drawLines() reads them back out via matchesById to know
+    // which cards to connect.
     return `
       <div class="match" data-id="${m.id}" data-path="${m.path}" data-next="${m.next || ''}" data-drops-to="${m.dropsTo || ''}">
         <div class="match-head"><span>${m.id}</span><span>${m.fmt}</span></div>
@@ -703,6 +791,9 @@ Move Upper Bracket Round 1 and Round 2 to the left
       </div>`;
   }
 
+  // Renders one bracket-canvas column group (upper / lower / grand final)
+  // by looking up each id in `groups` against matchesById and stamping
+  // out a card per match, wrapped in its round-name header.
   function renderRounds(container, groups){
     container.innerHTML = groups.map(g => `
       <div class="round-col">
@@ -712,6 +803,14 @@ Move Upper Bracket Round 1 and Round 2 to the left
     `).join('');
   }
 
+  // Rebuilds the entire Watch Order list from scratch every time. Walks
+  // `matches` in bracket order and, per match, emits one row per game:
+  //  - not revealed yet  → generic "locked" row, no team names, no link
+  //  - revealed          → real row with a working ▶ WATCH link
+  //  - revealed + ticked → skipped entirely (that's the "green tick"
+  //                        removal feature — see watchedKeys)
+  // Row numbering (`idx`) is recomputed every call so it stays gapless
+  // even as rows get revealed or removed.
   function renderWatchOrder(){
     let idx = 1;
     const html = matches.map(m => {
@@ -754,35 +853,49 @@ Move Upper Bracket Round 1 and Round 2 to the left
   }
 
   // ---- Connecting lines ------------------------------------------------
+  // Draws the amber/magenta curves linking each match to whatever its
+  // winner advances to (m.next). Re-run after every render because a
+  // card's on-screen position can shift as content reveals (e.g. the
+  // "?" score button appearing/disappearing).
+  //
+  // This measures real DOM positions with getBoundingClientRect() rather
+  // than computing coordinates from the CSS grid math, so it stays correct
+  // even if the bracket layout above changes — no line-drawing code to
+  // update if a column width or gap changes.
   function drawLines(){
     const canvas = document.getElementById('bracketCanvas');
     const svg = document.getElementById('bracketLines');
     if(!canvas || !svg) return;
+    // Size the SVG to the full scrollable content, not just the visible
+    // viewport, so lines stay correct when the bracket scrolls sideways
+    // on narrow screens.
     const w = canvas.scrollWidth, h = canvas.scrollHeight;
     svg.setAttribute('width', w);
     svg.setAttribute('height', h);
     svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
-    svg.innerHTML = '';
+    svg.innerHTML = ''; // clear last render's lines before redrawing
 
     const AMBER = '#f5b400', MAGENTA = '#ff3d81';
     const canvasRect = canvas.getBoundingClientRect();
 
+    // Converts a match card's viewport position into coordinates relative
+    // to the (possibly scrolled) bracket canvas, plus a couple of
+    // convenience anchor points used when drawing connectors.
     function ports(el){
       const r = el.getBoundingClientRect();
       const x = r.left - canvasRect.left + canvas.scrollLeft;
       const y = r.top  - canvasRect.top  + canvas.scrollTop;
       return {
-        leftX:  x,
-        rightX: x + r.width,
-        cx:     x + r.width / 2,
-        cy:     y + r.height / 2,
-        topY:   y,
-        botY:   y + r.height,
+        leftX:  x,             // left edge — where an incoming line arrives
+        rightX: x + r.width,   // right edge — where an outgoing line starts
+        cy:     y + r.height / 2, // vertical center — lines connect edge-to-edge at this height
       };
     }
-    // Smooth S-curve for forward (next) links — travels inside the column gutter.
+    // Smooth S-curve from one match's right edge to the next match's left
+    // edge, colored per bracket path (amber = upper, magenta = lower/GF).
     function curve(x1,y1,x2,y2,color){
-      const mx = (x1+x2)/2;
+      const mx = (x1+x2)/2; // horizontal midpoint — control points sit here
+      // so the curve leaves/arrives each card travelling horizontally.
       const path = document.createElementNS('http://www.w3.org/2000/svg','path');
       path.setAttribute('d', `M ${x1} ${y1} C ${mx} ${y1} ${mx} ${y2} ${x2} ${y2}`);
       path.setAttribute('stroke', color);
@@ -791,26 +904,11 @@ Move Upper Bracket Round 1 and Round 2 to the left
       path.setAttribute('stroke-linecap', 'round');
       svg.appendChild(path);
     }
-    // Orthogonal "elbow" routed through the empty gutter to the right of the
-    // column, so drop lines never cut across stacked match cards.
-    function elbowDrop(from, to){
-      const sx = from.rightX + 4;          // leave a small gap off the source
-      const sy = from.cy;
-      const tx = to.rightX + 4;            // enter the target's right side (gap)
-      const ty = to.cy;
-      const busX = Math.max(from.rightX, to.rightX) + 16; // right-side gutter
-      const d = `M ${sx} ${sy} L ${busX} ${sy} L ${busX} ${ty} L ${tx} ${ty}`;
-      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-      path.setAttribute('d', d);
-      path.setAttribute('stroke', MAGENTA);
-      path.setAttribute('stroke-width', '1.6');
-      path.setAttribute('fill', 'none');
-      path.setAttribute('stroke-linecap', 'round');
-      path.setAttribute('stroke-linejoin', 'round');
-      path.setAttribute('stroke-dasharray', '6 5');
-      svg.appendChild(path);
-    }
 
+    // One line per match that has a `next` — dropsTo (loser goes here) is
+    // shown as text via the "↴ loser to ..." label in matchCardHTML
+    // instead of a drawn line, which is why there's no elbow/dashed
+    // connector logic here.
     document.querySelectorAll('.match[data-id]').forEach(el => {
       const m = matchesById[el.dataset.id];
       if(!m) return;
@@ -827,6 +925,10 @@ Move Upper Bracket Round 1 and Round 2 to the left
     });
   }
 
+  // Re-renders every dynamic section of the page from current state, then
+  // waits a frame (so the new layout has settled) before redrawing the
+  // connecting lines. Called after any click that changes reveal/watched
+  // state, plus once on initial load.
   function renderAll(){
     renderRounds(document.getElementById('upperRounds'), upperGroups);
     renderRounds(document.getElementById('lowerRounds'), lowerGroups);
@@ -836,16 +938,28 @@ Move Upper Bracket Round 1 and Round 2 to the left
   }
 
   // ---- Interactions ------------------------------------------------
+  // Single delegated listener instead of per-button handlers — cheaper,
+  // and it keeps working after renderAll() replaces the DOM (no need to
+  // re-attach listeners to the new elements each time).
   document.addEventListener('click', (e) => {
     const revealBtn = e.target.closest('.reveal-teams');
     if(revealBtn){ teamsRevealed.add(revealBtn.dataset.id); renderAll(); return; }
     const scoreBtn = e.target.closest('.reveal-score');
     if(scoreBtn){ scoresRevealed.add(scoreBtn.dataset.id); renderAll(); return; }
+    const watchedBtn = e.target.closest('.watched-btn');
+    // Only the Watch Order list depends on watchedKeys, so a lighter
+    // renderWatchOrder() is enough here — no need to rebuild the bracket
+    // or redraw its lines for a change that doesn't touch them.
+    if(watchedBtn){ watchedKeys.add(watchedBtn.dataset.key); renderWatchOrder(); return; }
   });
 
+  // Master switch: ON reveals every match at once (teams + scores), OFF
+  // resets back to the Round-1-only starting state. Deliberately
+  // reversible, unlike the per-match reveal buttons, so testing/browsing
+  // with spoilers on and off again doesn't require a page reload.
   const toggle = document.getElementById('spoilerToggle');
   toggle.addEventListener('click', () => {
-    const on = document.body.classList.toggle('spoilers-on');
+    const on = document.body.classList.toggle('spoilers-on'); // drives the flip-clock CSS
     toggle.setAttribute('aria-pressed', on);
     if(on){
       matches.forEach(m => { teamsRevealed.add(m.id); scoresRevealed.add(m.id); });
@@ -856,10 +970,13 @@ Move Upper Bracket Round 1 and Round 2 to the left
     renderAll();
   });
 
+  // Bracket card widths/heights can shift slightly once the display/mono
+  // webfonts finish loading, so redraw the lines after that happens too —
+  // otherwise they can be drawn a few pixels off on a slow connection.
   window.addEventListener('resize', () => requestAnimationFrame(drawLines));
   if(document.fonts && document.fonts.ready){ document.fonts.ready.then(drawLines); }
 
-  renderAll();
+  renderAll(); // initial paint
 })();
 </script>
 
