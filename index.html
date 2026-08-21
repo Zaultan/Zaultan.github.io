@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ZAULT WATCH · Tournament VOD Hub</title>
-<meta name="description" content="A spoiler-safe VOD hub template: frozen bracket, staged reveals, watch order. Swap in your own tournament.">
+<meta name="description" content="A spoiler-safe VOD hub: frozen bracket, staged reveals, watch list.">
 
 <!--
   Still open:
@@ -741,6 +741,7 @@
   // `games`    = ordered VOD urls; null = that game wasn't played (series
   //              ended before it was needed)
   const matches = [
+  // round 1 Upper
     { id:'UR1-1', path:'up', roundName:'Round 1', fmt:'BO3',
       teamA:'Xtreme Gaming', teamB:'Tundra Esports', scoreA:2, scoreB:0,
       games:['https://youtu.be/ke5nzwisv-Q','https://www.youtube.com/watch?v=D84RWQf6-gY','https://zault.net'],
@@ -757,6 +758,8 @@
       teamA:'BB Team', teamB:'Nigma Galaxy', scoreA:2, scoreB:1,
       games:['https://www.youtube.com/watch?v=np7QK-Qkc70','https://www.youtube.com/watch?v=Ioxq_neNoj4&pp=0gcJCfkLAYcqIYzv','https://www.youtube.com/watch?v=yOGrD4cFBG4'],
       next:'UR2-2', dropsTo:'LR1-2' },
+      
+  // Round 1 Lower
 
     { id:'LR1-1', path:'down', roundName:'Round 1', fmt:'BO3',
       teamA:'Tundra Esports', teamB:'Heroic', scoreA:0, scoreB:2,
@@ -767,6 +770,8 @@
       games:['https://www.youtube.com/watch?v=FkWUJW7m4sg&pp=0gcJCfkLAYcqIYzv','https://www.youtube.com/watch?v=hNWtt-mV0VI','https://zault.net'],
       next:'LR2-2', dropsTo:null },
 
+  // Round 2 Upper 
+
     { id:'UR2-1', path:'up', roundName:'Round 2', fmt:'BO3',
       teamA:'Xtreme Gaming', teamB:'Parivision', scoreA:0, scoreB:2,
       games:['https://www.youtube.com/watch?v=dW-C2Cajm-E','https://www.youtube.com/watch?v=lvNl_SSKJpg','https://zault.net'],
@@ -776,6 +781,8 @@
       games:['https://www.youtube.com/watch?v=Z9Fg-P10glo','https://www.youtube.com/watch?v=yK10CCR6U6A','https://www.youtube.com/watch?v=zyo61kPZU64'],
       next:'UF', dropsTo:'LR2-1' },
 
+  //Round 2 Lower 
+
     { id:'LR2-1', path:'down', roundName:'Round 2', fmt:'BO3',
       teamA:'BB Team', teamB:'Heroic', scoreA:2, scoreB:1,
       games:['https://www.youtube.com/watch?v=YEP1oUO43L4','https://www.youtube.com/watch?v=qqgxs_bg29Q','https://www.youtube.com/watch?v=Vw2suZTSIR0'],
@@ -784,6 +791,8 @@
       teamA:'Xtreme Gaming', teamB:'Nigma Galaxy', scoreA:2, scoreB:0,
       games:['https://www.youtube.com/watch?v=HLn33oP8cik&pp=0gcJCfkLAYcqIYzv','https://www.youtube.com/watch?v=Dp0_VsS7pHk','https://zault.net'],
       next:'LSF', dropsTo:null },
+
+
 
     { id:'UF', path:'up', roundName:'Upper Final', fmt:'BO3',
       teamA:'Parivision', teamB:'Team Falcons', scoreA:1, scoreB:2,
@@ -799,6 +808,8 @@
       teamA:'Parivision', teamB:'Xtreme Gaming', scoreA:1, scoreB:2,
       games:['https://www.youtube.com/watch?v=bMjOS94IFjo','https://www.youtube.com/watch?v=4WdegZkxAAE','https://www.youtube.com/watch?v=OOmS0V_V4IA'],
       next:'GF', dropsTo:null },
+
+
 
     { id:'GF', path:'gf', roundName:'Grand Final', fmt:'BO5',
       teamA:'Team Falcons', teamB:'Xtreme Gaming', scoreA:3, scoreB:2,
