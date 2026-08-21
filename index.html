@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>REPLAY BLOCK · Tournament VOD Hub</title>
+<title>ZAULT WATCH · Tournament VOD Hub</title>
 <meta name="description" content="A spoiler-safe VOD hub template: frozen bracket, staged reveals, watch order. Swap in your own tournament.">
 
 <!--
@@ -30,6 +30,8 @@
     --amber:      #f5b400;   /* upper bracket / winners path */
     --magenta:    #f83abf;   /* lower bracket / elimination path */
     --mint:       #63e6be;   /* links, focus rings, interactive accents */
+    --danger:     #ff4d5e;   /* "spoilers are visible now" warning state */
+    --danger-rgb: 255,77,94; /* same color, unpacked for use inside rgba() at varying alpha */
     --font-display: 'Bebas Neue', sans-serif;   /* big condensed headings */
     --font-body:    'Inter', system-ui, sans-serif;  /* everyday paragraph text */
     --font-mono:    'IBM Plex Mono', monospace;      /* labels, stats, anything "data-ish" */
@@ -74,9 +76,10 @@
   h2{ font-size:clamp(28px,4vw,42px); }
   p{ color:var(--text-dim); }
 
-  /* Generic two-column flex helper — used by the hero/header section to sit
-     the title next to the blackout-mode note. Kept generic (not prefixed
-     "header-") in case it's reused elsewhere later. */
+  /* Generic two-column flex helper — heading/eyebrow on the left, a
+     supporting paragraph (or, in the banner, the blackout-mode badge) on
+     the right. Used at the top of every section for a consistent layout,
+     which is why it's named generically rather than "banner-*". */
   .container {
     display: flex;       /* Places child elements side by side */
     gap: 20px;           /* Adds space between columns */
@@ -152,11 +155,11 @@
   }
   .spoiler-toggle:active{ transform:translateY(0); }
   body.spoilers-on .spoiler-toggle{
-    color:#ff8a95; border-color:rgba(255,77,94,0.55);
-    background:linear-gradient(180deg, rgba(255,77,94,0.16), rgba(255,77,94,0.05));
-    box-shadow:0 0 0 3px rgba(255,77,94,0.12), 0 6px 18px -8px rgba(255,77,94,0.45);
+    color:#ff8a95; border-color:rgba(var(--danger-rgb),0.55);
+    background:linear-gradient(180deg, rgba(var(--danger-rgb),0.16), rgba(var(--danger-rgb),0.05));
+    box-shadow:0 0 0 3px rgba(var(--danger-rgb),0.12), 0 6px 18px -8px rgba(var(--danger-rgb),0.45);
   }
-  body.spoilers-on .spoiler-toggle:hover{ border-color:#ff4d5e; }
+  body.spoilers-on .spoiler-toggle:hover{ border-color:var(--danger); }
   .spoiler-toggle .reel{
     position:relative; width:46px; height:22px; overflow:hidden;
     border-radius:6px; background:var(--ink); border:1px solid var(--line-2);
@@ -214,10 +217,10 @@
   /* Spoilers ON = blackout mode is no longer doing anything, so the badge
      flips from its normal mint "all clear" color to a red warning color. */
   body.spoilers-on .shield-badge{
-    --status-color: #ff4d5e;
-    --status-glow: rgba(255,77,94,0.55);
-    border-color:rgba(255,77,94,0.4);
-    background:rgba(255,77,94,0.08);
+    --status-color: var(--danger);
+    --status-glow: rgba(var(--danger-rgb),0.55);
+    border-color:rgba(var(--danger-rgb),0.4);
+    background:rgba(var(--danger-rgb),0.08);
   }
   .shield-badge .pulse{
     width:8px; height:8px; border-radius:50%; background:var(--status-color);
@@ -232,12 +235,13 @@
 /* ---------- BRACKET ---------- */
   .bracket-legend{
     display:flex; gap:22px; flex-wrap:wrap; margin:26px 0 40px;
-    justify-content:center; text-align:center;
+    justify-content:flex-start; text-align:left;
   }
   .bracket-legend .item{
     display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-dim);
   }
   .swatch{ width:14px; height:4px; border-radius:2px; }
+  .swatch.up{ background:var(--amber); }
   .swatch.down{ background:var(--magenta); }
 
   .bracket-canvas{
@@ -513,6 +517,7 @@
 
   @media (max-width:640px){
     section{ padding:64px 0; }
+    .container{ flex-direction:column; gap:8px; }
     .order-item{ grid-template-columns:36px 1fr; }
     .order-item .play{ grid-column:2; justify-self:start; }
     .bracket-outer{ grid-template-columns:minmax(0,1fr) 236px; gap:0 28px; }
@@ -523,18 +528,18 @@
 </head>
 <body>
 
-<section class="header">
+<section class="banner">
     <div class="wrap">
-    <div class="header-media"><span><img src="https://raw.githubusercontent.com/Zaultan/Zaultan.github.io/refs/heads/main/Assets/Banner_1.png" alt="Description of image"></span></div>
+    <div class="banner-media"><span><img src="https://raw.githubusercontent.com/Zaultan/Zaultan.github.io/refs/heads/main/Assets/Banner_1.png" alt="Description of image"></span></div>
     <div class="container">
       <div class="column">
         <p class="eyebrow">The International 2025 - Testing for 2026</p>
-        <h1>SPOILER BLOCK</h1>
+        <h1>ZAULT WATCH</h1>
         <p class="sub"> SPOILER-SAFE VODs FOR THE INTERNATIONALs</p>
       </div>
       <div class="column">
         <div class="shield-badge"><span class="pulse"></span> BLACKOUT MODE — ENGAGED</div>
-        <p class="header-note">Nothing below is revealed until you ask for it. Matchups and scores stay
+        <p class="banner-note">Nothing below is revealed until you ask for it. Matchups and scores stay
         hidden match-by-match, or flip the switch above to open the whole bracket at once.</p>
       </div>
     </div>
@@ -545,7 +550,7 @@
 </section>
 <header class="nav">
   <div class="nav-row">
-    <div class="brand"><span class="dot">◆</span> REPLAY BLOCK</div>
+    <div class="brand"><span class="dot">◆</span> ZAULT WATCH</div>
     <nav class="nav-links">
       <a href="#bracket">Bracket</a>
       <a href="#watch-order">Watch Order</a>
@@ -564,13 +569,20 @@
 </header>
 <section id="bracket">
   <div class="wrap">
-    <p class="eyebrow">Step One</p>
-    <h2>Bracket</h2>
-    <p style="max-width:560px;margin-top:10px;">Double elimination, with the 8 starting matches displayed.
-      Click the eye on any match to reveal which teams are playing — the score stays hidden until you click the ?.
-      All games matches show 3 games to prevent spoilers.</p>
+    <div class="container">
+      <div class="column">
+        <p class="eyebrow">Step One</p>
+        <h2>Bracket</h2>
+      </div>
+      <div class="column">
+        <p>Double elimination, with the 8 starting matches displayed.
+          Click the eye on any match to reveal which teams are playing — the score stays hidden until you click the ?.
+          All games matches show 3 games to prevent spoilers.</p>
+      </div>
+    </div>
 
     <div class="bracket-legend">
+      <div class="item"><span class="swatch up"></span> Upper bracket — winners path</div>
       <div class="item"><span class="swatch down"></span> Lower bracket — one loss and you're out</div>
     </div>
 
@@ -600,11 +612,17 @@
 
 <section id="watch-order">
   <div class="wrap">
-    <p class="eyebrow">Step Two</p>
-    <h2>Watch Order</h2>
-    <p style="max-width:560px;margin-top:10px;">Every game from the tournament, in play order.
-      Rows stay locked until you reveal that match in the bracket below — reveal a match once,
-      and every game inside it unlocks here too.</p>
+    <div class="container">
+      <div class="column">
+        <p class="eyebrow">Step Two</p>
+        <h2>Watch Order</h2>
+      </div>
+      <div class="column">
+        <p>Every game from the tournament, in play order.
+          Rows stay locked until you reveal that match in the bracket below — reveal a match once,
+          and every game inside it unlocks here too.</p>
+      </div>
+    </div>
     <ul class="order-list" id="watchOrderList"></ul>
     <p class="warn">⚠ Video titles on the host channel will name both teams. Only reveal a
       match once you're actually ready to watch it.</p>
@@ -613,9 +631,15 @@
 
 <section id="teams">
   <div class="wrap">
-    <p class="eyebrow">The field</p>
-    <h2>Participants</h2>
-    <p style="max-width:520px;margin-top:10px;">Team Ratings taken from Liquipedia on 2026-08-02</p>
+    <div class="container">
+      <div class="column">
+        <p class="eyebrow">The field</p>
+        <h2>Participants</h2>
+      </div>
+      <div class="column">
+        <p>Team Ratings taken from Liquipedia on 2026-08-02</p>
+      </div>
+    </div>
     <div class="team-grid">
       <div class="team-card"><div class="flag">A</div><div class="name">Xtreme Gaming</div><div class="seed">SEED 1</div><div class="mmr">Points 1653</div></div>
       <div class="team-card"><div class="flag">B</div><div class="name">Tundra Esport</div><div class="seed">SEED 2</div><div class="mmr">Points 1487</div></div>
@@ -632,11 +656,17 @@
 
 <section id="prizes">
   <div class="wrap">
-    <p class="eyebrow">Community-funded</p>
-    <h2>Prize Pool</h2>
+    <div class="container">
+      <div class="column">
+        <p class="eyebrow">Community-funded</p>
+        <h2>Prize Pool</h2>
+      </div>
+      <div class="column">
+        <p>Tournament Split of prize pools and their percentages</p>
+      </div>
+    </div>
     <div class="prize-card">
       <div class="prize-total">$2,881,791</div>
-      <p style="margin-top:4px;">Tournament Split of prize pools and their percentages</p>
       <div class="split-bar"><span></span><span></span><span></span><span></span><span></span></div>
       <div class="split-legend">
         <span><span class="dot c1"></span>42.5% — <span class="who">1st $1,224,732 </span></span>
@@ -651,7 +681,7 @@
 
 <footer>
   <div class="wrap">
-    SPOILER BLOCK · a small project by Zault ·
+    ZAULT WATCH · a small project by Zault ·
     <a href="#">Back to the top</a> ·
     <a href="#">href</a> ·
     This is a blank space semper fi lorem ipsum sigma alpha
@@ -673,9 +703,11 @@
   //    the relevant HTML from `matches` + the current Sets. Simpler to
   //    reason about than tracking incremental DOM updates, and cheap
   //    enough for ~14 matches that performance is a non-issue.
-  // 4. drawLines() runs after every render (via requestAnimationFrame, so
-  //    it waits for the new layout to settle) and draws the SVG curves
-  //    connecting each match to whatever it feeds into.
+  // 4. drawLines() redraws the SVG curves connecting each match to whatever
+  //    it feeds into. It only runs after renderAll() (via
+  //    requestAnimationFrame, so it waits for the new layout to settle) —
+  //    ticking a game as watched only touches the Watch Order list, so
+  //    that path calls the lighter renderWatchOrder() alone and skips it.
   // =====================================================================
 
   // ---- Bracket + VOD data ------------------------------------------------
@@ -767,14 +799,16 @@
   ];
   const gfGroups = [{ name:'Grand Final', ids:['GF'] }];
 
-  // Human-readable short names for match ids, used in "→ advances to" text
-  // and in the Watch Order stage label. UR1-x isn't listed because those
-  // matches never appear as someone else's `next`/`dropsTo` target.
+  // Human-readable short names for the matches that can appear as a
+  // "loser drops to X" target (see dropsTo below) — the only place this
+  // map is still read now that the "winner advances to" text label has
+  // been removed in favor of the connector lines alone. Only lower-bracket
+  // Round 1/2 slots and the Lower Final ever get dropped into, so those
+  // are the only keys that exist here.
   const SHORT_LABEL = {
-    'UR2-1':'Upper R2 · M1', 'UR2-2':'Upper R2 · M2', 'UF':'Upper Final',
     'LR1-1':'Lower R1 · M1', 'LR1-2':'Lower R1 · M2',
     'LR2-1':'Lower R2 · M1', 'LR2-2':'Lower R2 · M2',
-    'LSF':'Lower Semifinal', 'LF':'Lower Final', 'GF':'Grand Final',
+    'LF':'Lower Final',
   };
   const PATH_LABEL = { up:'Upper Bracket', down:'Lower Bracket', gf:'Grand Final' };
 
@@ -815,11 +849,12 @@
       }
     }
 
-    // "Advances to" / "loser drops to" footer text, built from this
-    // match's own next/dropsTo ids rather than hardcoded per match.
+    // "Loser drops to" footer text — where the match's own `next` field
+    // used to also render a "winner advances to" label as text, that's
+    // now shown only via the colored connector line drawLines() draws
+    // between cards, not duplicated here.
     let advanceHTML = '';
-    if(m.next) advanceHTML += `<div class="advance">→ ${SHORT_LABEL[m.next] || m.next}</div>`;
-    else advanceHTML += `<div class="advance">🏆 Champion crowned</div>`;
+    if(!m.next) advanceHTML += `<div class="advance">🏆 Champion crowned</div>`;
     if(m.dropsTo) advanceHTML += `<div class="advance drop">↴ loser to ${SHORT_LABEL[m.dropsTo] || m.dropsTo}</div>`;
 
     // data-id/data-next/data-drops-to on the wrapper aren't used for
@@ -952,7 +987,7 @@
     // horizontal midpoint, then straight into the target. Bolder stroke +
     // straight segments (instead of a bezier curve) is what gives these
     // their angular, blueprint-like look rather than a soft flowing line.
-    function curve(x1,y1,x2,y2,color){
+    function drawConnector(x1,y1,x2,y2,color){
       const mx = (x1+x2)/2; // the single bend happens here
       const path = document.createElementNS('http://www.w3.org/2000/svg','path');
       path.setAttribute('d', `M ${x1} ${y1} L ${mx} ${y1} L ${mx} ${y2} L ${x2} ${y2}`);
@@ -977,7 +1012,7 @@
         if(target){
           const to = ports(target);
           // 4px gap at each end so lines don't kiss the card borders.
-          curve(from.rightX + 4, from.cy, to.leftX - 4, to.cy,
+          drawConnector(from.rightX + 4, from.cy, to.leftX - 4, to.cy,
                 m.path === 'down' ? MAGENTA : AMBER);
         }
       }
@@ -986,8 +1021,9 @@
 
   // Re-renders every dynamic section of the page from current state, then
   // waits a frame (so the new layout has settled) before redrawing the
-  // connecting lines. Called after any click that changes reveal/watched
-  // state, plus once on initial load.
+  // connecting lines. Called after any click that reveals a matchup/score,
+  // plus once on initial load — marking a game watched uses the lighter
+  // renderWatchOrder() alone (see the click handler below).
   function renderAll(){
     renderRounds(document.getElementById('upperRounds'), upperGroups);
     renderRounds(document.getElementById('lowerRounds'), lowerGroups);
