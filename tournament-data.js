@@ -28,7 +28,7 @@
 const matches = [
   // round 1 Upper
   { id:'UR1-1', path:'up', roundName:'Round 1', fmt:'BO3',
-    teamA:'Xtreme Gaming', teamB:'Tundra Esports', scoreA:2, scoreB:0,
+    teamA:'Xtreme Gaming2', teamB:'Tundra Esports', scoreA:2, scoreB:0,
     games:['https://youtu.be/ke5nzwisv-Q','https://www.youtube.com/watch?v=D84RWQf6-gY','https://zault.net'],
     next:'UR2-1', dropsTo:'LR1-1' },
   { id:'UR1-2', path:'up', roundName:'Round 1', fmt:'BO3',
